@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css"
 import { Inter } from "next/font/google"
+import { ThemeProvider } from "@/components/theme-provider"
 
 import { cn } from "@/lib/utils"
 
@@ -23,7 +24,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.variable}>
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
