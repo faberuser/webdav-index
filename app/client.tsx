@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/toggleMode"
-import { DownloadIcon, FolderIcon, MenuIcon, ArrowDownIcon, ArrowRightIcon, LoadingIcon, LoadingIconLarge, FileIcon } from "@/components/icons"
+import { DownloadIcon, FolderIcon, FileIcon, MenuIcon, ArrowDownIcon, ArrowRightIcon, LoadingIcon, LoadingIconLarge, ZipIcon } from "@/components/icons"
 import { useState, useEffect } from "react"
 
 import { ChevronDown, Slash } from "lucide-react"
@@ -11,7 +11,6 @@ import { ChevronDown, Slash } from "lucide-react"
 import {
     Breadcrumb,
     BreadcrumbItem,
-    BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator,
@@ -25,7 +24,7 @@ import {
 
 const cache: any = {}
 
-export default function Client() {
+export default function Client({ title }: any) {
     const [rootDirItems, setRootDirItems] = useState([])
     const [dirItems, setDirItems] = useState([])
     const [currentPath, setCurrentPath] = useState("")
@@ -67,13 +66,13 @@ export default function Client() {
                 </div>
             )}
 
-            <div className="hidden h-full w-64 shrink-0 border-r bg-gray-100 dark:border-gray-800 dark:bg-gray-900 lg:block">
+            <div className="hidden h-full w-64 shrink-0 border-r dark:border-gray-600 lg:block">
                 <div className="flex h-full flex-col gap-4 p-4">
-                    <Link href="#" className="flex items-center gap-2 font-semibold" prefetch={false}>
+                    <Link href="#" className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-50" prefetch={false}>
                         <FolderIcon className="h-6 w-6" />
-                        <span>WebDav Index</span>
+                        <span>{title}</span>
                     </Link>
-                    <nav className="flex-1 space-y-2 overflow-auto">
+                    <nav className="flex-1 space-y-2 overflow-auto text-gray-700 dark:text-gray-300">
 
                         {rootDirItems.filter((dir: any) => dir.type === "directory").map((dir: any, index: number) => (
                             <ListDirs
@@ -88,8 +87,9 @@ export default function Client() {
                     </nav>
                 </div>
             </div>
+
             <div className="flex flex-1 flex-col">
-                <div className="flex h-14 items-center justify-between border-b bg-gray-100 px-6 dark:border-gray-800 dark:bg-gray-900">
+                <div className="flex h-14 items-center justify-between border-b dark:border-gray-600 px-6">
                     <div className="flex items-center gap-4">
 
                         <Button variant="ghost" size="icon" className="lg:hidden">
@@ -107,7 +107,7 @@ export default function Client() {
                     </div>
                 </div>
                 <div className="flex-1 overflow-auto p-4 md:p-6">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
 
                         <AccessDir
                             items={dirItems}
@@ -117,6 +117,7 @@ export default function Client() {
                     </div>
                 </div>
             </div>
+
         </div>
     )
 }
@@ -156,7 +157,7 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
 
     return (
         <div>
-            <div style={{ cursor: 'pointer' }} onClick={handleExpand} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800">
+            <div style={{ cursor: 'pointer' }} onClick={handleExpand} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-200 dark:hover:bg-gray-800">
                 {isLoading && <LoadingIcon />}
                 {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
                 {/* {lastPath === dir ? <span className="font-semibold text-blue-500">{dir}</span> : dir} */}
@@ -175,7 +176,7 @@ function AccessDir({ items, onChange }: any) {
     return (
         items.map((dir: any, index: number) => (
             dir.type === 'directory' ?
-                <div style={{ cursor: 'pointer' }} key={index} onClick={() => onChange(dir.filename)} className="group relative rounded-md border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700">
+                <div style={{ cursor: 'pointer' }} key={index} onClick={() => onChange(dir.filename)} className="group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
                     <div className="text-center">
                         <div className="flex h-20 w-full items-center justify-center">
                             <FolderIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
@@ -186,13 +187,17 @@ function AccessDir({ items, onChange }: any) {
                     </div>
                 </div>
                 :
-                <div key={index} className="group relative rounded-md border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700">
+                <div key={index} className="group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
                     <Button variant="outline" size="sm" className="absolute top-1 right-1">
                         <DownloadIcon className="h-4 w-4" />
                     </Button>
                     <div className="text-center">
                         <div className="flex h-20 w-full items-center justify-center">
-                            <FileIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
+                            {dir.basename.endsWith('.zip') ?
+                                <ZipIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
+                                :
+                                <FileIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
+                            }
                         </div>
                         <div className="relative mt-4">
                             <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
@@ -272,7 +277,7 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
         )
     } else if (pathnames.length >= 3) {
         return (
-            <Breadcrumb>
+            <Breadcrumb className="text-gray-900 dark:text-gray-50">
                 <BreadcrumbList>
 
                     <BreadcrumbItem>
@@ -289,13 +294,17 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                                 {secondLastPath}
                                 <ChevronDown className="h-4 w-4" />
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-white dark:bg-gray-800">
+                            <DropdownMenuContent className="bg-white dark:bg-black dark:border-gray-700">
 
                                 {middlePaths.map((value: string, index: number) => {
                                     const valueLocation = [...pathnames.slice(0, index), value].join('/')
                                     return (
-                                        <DropdownMenuItem key={index}>
-                                            <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("/" + valueLocation)}>{value}</BreadcrumbPage>
+                                        <DropdownMenuItem
+                                            style={{ cursor: 'pointer' }}
+                                            key={index}
+                                            onClick={() => onChange("/" + valueLocation)}
+                                            className="hover:bg-gray-200 dark:hover:bg-gray-800">
+                                            <BreadcrumbPage >{value}</BreadcrumbPage>
                                         </DropdownMenuItem>
                                     );
                                 })}

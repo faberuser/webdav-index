@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import "@/styles/globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
-
-import { cn } from "@/lib/utils"
+import { title } from '@/config'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -23,6 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <title>{title}</title>
+      </head>
+
       <body className={inter.variable}>
         <ThemeProvider
           attribute="class"
