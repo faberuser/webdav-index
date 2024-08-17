@@ -15,4 +15,8 @@ pnpm dev
 bun dev
 ```
 
+## Config
+
+Create a copy of `config-example.tsx` and remove `-example` with filled fields.
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
