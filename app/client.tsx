@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/toggleMode"
-import { DownloadIcon, FolderIcon, MenuIcon, ArrowDownIcon, ArrowRightIcon, LoadingIcon, FileIcon } from "@/components/icons"
+import { DownloadIcon, FolderIcon, MenuIcon, ArrowDownIcon, ArrowRightIcon, LoadingIcon, LoadingIconLarge, FileIcon } from "@/components/icons"
 import { useState, useEffect } from "react"
 
 import { ChevronDown, Slash } from "lucide-react"
@@ -29,8 +29,10 @@ export default function Client() {
     const [rootDirItems, setRootDirItems] = useState([])
     const [dirItems, setDirItems] = useState([])
     const [currentPath, setCurrentPath] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
 
     const fetchContents = async () => {
+        setIsLoading(true)
         const response = await fetch(`/api/listContents?dir=${encodeURIComponent(currentPath)}`)
         const json = await response.json()
         cache[currentPath] = json
@@ -38,6 +40,7 @@ export default function Client() {
         if (rootDirItems.length === 0) {
             setRootDirItems(json)
         }
+        setIsLoading(false)
     }
 
     useEffect(() => {
@@ -58,6 +61,12 @@ export default function Client() {
 
     return (
         <div className="flex h-screen w-full">
+            {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 dark:bg-white dark:bg-opacity-10 z-50">
+                    <LoadingIconLarge />
+                </div>
+            )}
+
             <div className="hidden h-full w-64 shrink-0 border-r bg-gray-100 dark:border-gray-800 dark:bg-gray-900 lg:block">
                 <div className="flex h-full flex-col gap-4 p-4">
                     <Link href="#" className="flex items-center gap-2 font-semibold" prefetch={false}>
@@ -94,10 +103,6 @@ export default function Client() {
 
                     </div>
                     <div className="flex items-center gap-4">
-                        <Button variant="outline" size="sm">
-                            <DownloadIcon className="h-4 w-4 mr-2" />
-                            Download
-                        </Button>
                         <ModeToggle />
                     </div>
                 </div>
@@ -152,10 +157,10 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
     return (
         <div>
             <div style={{ cursor: 'pointer' }} onClick={handleExpand} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800">
-                {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon className="h-4 w-4" /> : <ArrowRightIcon className="h-4 w-4" />)}
+                {isLoading && <LoadingIcon />}
+                {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
                 {/* {lastPath === dir ? <span className="font-semibold text-blue-500">{dir}</span> : dir} */}
                 {dir}
-                {isLoading && <LoadingIcon className="h-4 w-4 ml-2" />}
             </div>
             {isExpanded && subDirs.map((subDir: any, index: number) => (
                 <div key={index} style={{ marginLeft: '10px' }}>
@@ -169,31 +174,32 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
 function AccessDir({ items, onChange }: any) {
     return (
         items.map((dir: any, index: number) => (
-            <div key={index} onClick={() => onChange(dir.filename)} className="group relative rounded-md border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700">
-                <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-                    {dir.type === 'directory' ?
-                        <span className="sr-only">Open {dir.basename}</span>
-                        :
-                        <span className="sr-only">Download {dir.basename}</span>
-                    }
-                </Link>
-                <div className="flex h-20 w-full items-center justify-center">
-                    {dir.type === 'directory' ?
-                        <FolderIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
-                        :
-                        <FileIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
-                    }
+            dir.type === 'directory' ?
+                <div style={{ cursor: 'pointer' }} key={index} onClick={() => onChange(dir.filename)} className="group relative rounded-md border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700">
+                    <div className="text-center">
+                        <div className="flex h-20 w-full items-center justify-center">
+                            <FolderIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
+                        </div>
+                        <div className="relative mt-4">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
+                        </div>
+                    </div>
                 </div>
-                <div className="mt-4 text-center">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50">{dir.basename}</h3>
-                    {dir.type === 'directory' ?
-                        // <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{dir.items} items</p>
-                        <p></p>
-                        :
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{dir.size} MB</p>
-                    }
+                :
+                <div key={index} className="group relative rounded-md border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700">
+                    <Button variant="outline" size="sm" className="absolute top-1 right-1">
+                        <DownloadIcon className="h-4 w-4" />
+                    </Button>
+                    <div className="text-center">
+                        <div className="flex h-20 w-full items-center justify-center">
+                            <FileIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
+                        </div>
+                        <div className="relative mt-4">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 truncate">{dir.size} MB</p>
+                        </div>
+                    </div>
                 </div>
-            </div >
         ))
     )
 }
