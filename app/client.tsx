@@ -72,7 +72,7 @@ export default function Client({ title }: any) {
                         <FolderIcon className="h-6 w-6" />
                         <span>{title}</span>
                     </Link>
-                    <nav className="flex-1 space-y-2 overflow-auto text-gray-700 dark:text-gray-300">
+                    <nav className="dirtree flex-1 space-y-2 overflow-auto text-gray-700 dark:text-gray-300">
 
                         {rootDirItems.filter((dir: any) => dir.type === "directory").map((dir: any, index: number) => (
                             <ListDirs
@@ -161,7 +161,9 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
                 {isLoading && <LoadingIcon />}
                 {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
                 {/* {lastPath === dir ? <span className="font-semibold text-blue-500">{dir}</span> : dir} */}
-                {dir}
+                <div className="truncate">
+                    {dir}
+                </div>
             </div>
             {isExpanded && subDirs.map((subDir: any, index: number) => (
                 <div key={index} style={{ marginLeft: '10px' }}>
@@ -187,21 +189,21 @@ function AccessDir({ items, onChange }: any) {
                     </div>
                 </div>
                 :
-                <div key={index} className="group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
-                    <Button variant="outline" size="sm" className="absolute top-1 right-1">
-                        <DownloadIcon className="h-4 w-4" />
+                <div key={index} className="group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 dark:border-gray-600">
+                    <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400">
+                        <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
                     </Button>
-                    <div className="text-center">
-                        <div className="flex h-20 w-full items-center justify-center">
+                    <div className="text-center truncate">
+                        <div className="flex h-20 w-full items-center justify-center text-gray-500 dark:text-gray-400">
                             {dir.basename.endsWith('.zip') ?
-                                <ZipIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
+                                <ZipIcon className="h-12 w-12" />
                                 :
-                                <FileIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
+                                <FileIcon className="h-12 w-12" />
                             }
                         </div>
                         <div className="relative mt-4">
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
-                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 truncate">{dir.size} MB</p>
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50">{dir.basename}</h3>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{dir.size} MB</p>
                         </div>
                     </div>
                 </div>
