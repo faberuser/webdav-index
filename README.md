@@ -1,4 +1,4 @@
-# (WIP) webDav-index
+# (WIP) webdav-index
 interface indexer for webdav
 
 ## Getting Started
