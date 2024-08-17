@@ -67,9 +67,11 @@ export default function Client() {
                     <nav className="flex-1 space-y-2 overflow-auto">
 
                         {rootDirItems.filter((dir: any) => dir.type === "directory").map((dir: any, index: number) => (
-                            <ListDirs key={index}
+                            <ListDirs
+                                key={index}
                                 dir={dir.basename}
                                 path={'/' + dir.basename}
+                                currentPath={currentPath}
                                 onChange={(_path: any) => setNewPath(_path)}
                             />
                         ))}
@@ -85,7 +87,10 @@ export default function Client() {
                             <MenuIcon className="h-6 w-6" />
                         </Button>
 
-                        <UpdateBreadcrumb path={currentPath} onChange={(_path: any) => setNewPath(_path)} />
+                        <UpdateBreadcrumb
+                            path={currentPath}
+                            onChange={(_path: any) => setNewPath(_path)}
+                        />
 
                     </div>
                     <div className="flex items-center gap-4">
@@ -99,7 +104,10 @@ export default function Client() {
                 <div className="flex-1 overflow-auto p-4 md:p-6">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 
-                        <AccessDir items={dirItems} onChange={(_path: any) => setNewPath(_path)} />
+                        <AccessDir
+                            items={dirItems}
+                            onChange={(_path: any) => setNewPath(_path)}
+                        />
 
                     </div>
                 </div>
@@ -108,7 +116,7 @@ export default function Client() {
     )
 }
 
-function ListDirs({ dir, path, onChange }: any) {
+function ListDirs({ dir, path, currentPath = "", onChange }: any) {
     const [isExpanded, setIsExpanded] = useState(false)
     const [dirItems, setDirItems] = useState([])
     const [isLoading, setIsLoading] = useState(false)
@@ -138,10 +146,14 @@ function ListDirs({ dir, path, onChange }: any) {
     }
 
     const subDirs = dirItems.filter((_dir: any) => _dir.type === "directory")
+    // const lastPath = currentPath.split('/').filter((x: string) => x).pop()
+    // console.log(lastPath, path)
+
     return (
         <div>
             <div style={{ cursor: 'pointer' }} onClick={handleExpand} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800">
                 {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon className="h-4 w-4" /> : <ArrowRightIcon className="h-4 w-4" />)}
+                {/* {lastPath === dir ? <span className="font-semibold text-blue-500">{dir}</span> : dir} */}
                 {dir}
                 {isLoading && <LoadingIcon className="h-4 w-4 ml-2" />}
             </div>
@@ -175,7 +187,8 @@ function AccessDir({ items, onChange }: any) {
                 <div className="mt-4 text-center">
                     <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50">{dir.basename}</h3>
                     {dir.type === 'directory' ?
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{dir.items} items</p>
+                        // <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{dir.items} items</p>
+                        <p></p>
                         :
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{dir.size} MB</p>
                     }
@@ -189,7 +202,7 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
     const pathnames = path.split('/').filter((x: string) => x)
     const secondLastPath = pathnames[pathnames.length - 2]
     const lastPath = pathnames[pathnames.length - 1]
-    const middlePaths = pathnames.slice(1, pathnames.length - 1)
+    const middlePaths = pathnames.slice(0, pathnames.length - 1)
 
     if (pathnames.length === 0) {
         return (
@@ -197,7 +210,7 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                 <BreadcrumbList>
 
                     <BreadcrumbItem>
-                        <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                        <BreadcrumbPage>Home</BreadcrumbPage>
                     </BreadcrumbItem>
 
                 </BreadcrumbList>
@@ -209,7 +222,35 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                 <BreadcrumbList>
 
                     <BreadcrumbItem>
-                        <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("")}>Home</BreadcrumbPage>
+                    </BreadcrumbItem>
+
+                    <BreadcrumbSeparator>
+                        <Slash />
+                    </BreadcrumbSeparator>
+
+                    <BreadcrumbItem>
+                        <BreadcrumbPage >{lastPath}</BreadcrumbPage>
+                    </BreadcrumbItem>
+
+                </BreadcrumbList>
+            </Breadcrumb>
+        )
+    } else if (pathnames.length === 2) {
+        return (
+            <Breadcrumb>
+                <BreadcrumbList>
+
+                    <BreadcrumbItem>
+                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("")}>Home</BreadcrumbPage>
+                    </BreadcrumbItem>
+
+                    <BreadcrumbSeparator>
+                        <Slash />
+                    </BreadcrumbSeparator>
+
+                    <BreadcrumbItem>
+                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("/" + secondLastPath)}>{secondLastPath}</BreadcrumbPage>
                     </BreadcrumbItem>
 
                     <BreadcrumbSeparator>
@@ -223,41 +264,13 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                 </BreadcrumbList>
             </Breadcrumb>
         )
-    } else if (pathnames.length === 2 || pathnames.length === 3) {
+    } else if (pathnames.length >= 3) {
         return (
             <Breadcrumb>
                 <BreadcrumbList>
 
                     <BreadcrumbItem>
-                        <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                    </BreadcrumbItem>
-
-                    <BreadcrumbSeparator>
-                        <Slash />
-                    </BreadcrumbSeparator>
-
-                    <BreadcrumbItem>
-                        <BreadcrumbLink href={`/${secondLastPath}`}>{secondLastPath}</BreadcrumbLink>
-                    </BreadcrumbItem>
-
-                    <BreadcrumbSeparator>
-                        <Slash />
-                    </BreadcrumbSeparator>
-
-                    <BreadcrumbItem>
-                        <BreadcrumbPage>{lastPath}</BreadcrumbPage>
-                    </BreadcrumbItem>
-
-                </BreadcrumbList>
-            </Breadcrumb>
-        )
-    } else if (pathnames.length >= 4) {
-        return (
-            <Breadcrumb>
-                <BreadcrumbList>
-
-                    <BreadcrumbItem>
-                        <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("")}>Home</BreadcrumbPage>
                     </BreadcrumbItem>
 
                     <BreadcrumbSeparator>
@@ -270,14 +283,13 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                                 {secondLastPath}
                                 <ChevronDown className="h-4 w-4" />
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="">
+                            <DropdownMenuContent className="bg-white dark:bg-gray-800">
 
                                 {middlePaths.map((value: string, index: number) => {
-                                    const to = `/${pathnames.slice(0, index + 1).join('/')}`;
-
+                                    const valueLocation = [...pathnames.slice(0, index), value].join('/')
                                     return (
-                                        <DropdownMenuItem key={to}>
-                                            <Link href={to}>{value}</Link>
+                                        <DropdownMenuItem key={index}>
+                                            <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("/" + valueLocation)}>{value}</BreadcrumbPage>
                                         </DropdownMenuItem>
                                     );
                                 })}

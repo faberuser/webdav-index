@@ -34,29 +34,28 @@ export async function getContentsCache() {
 export async function listContents(dir: string, deep: boolean = false, countItems: boolean = false) {
   let dirContents: any = await getContentsCache()
 
-  // let updatedDirContents = dirContents.map(obj => {
-  //   if (obj.type === 'directory') {
-  //     const dirName = obj.filename;
-  //     const count = dirContents.filter(item => {
-  //       const itemParts = item.filename.split('/');
-  //       const dirParts = dirName.split('/');
-  //       return item.filename.startsWith(dirName + '/') && itemParts.length === dirParts.length + 2;
-  //     }).length;
-  //     return { ...obj, items: count };
-  //   }
-  //   return obj;
-  // })
+  // dirContents = dirContents.map(obj => {
+  //   if (obj.type !== 'directory') return obj;
 
-  // dirContents = updatedDirContents
+  //   const dirName = obj.filename;
+  //   const count = dirContents.reduce((acc, item) => {
+  //     const isSubItem = item.filename.startsWith(dirName + '/') && item.filename.split('/').length === dirName.split('/').length + 2;
+  //     return isSubItem ? acc + 1 : acc;
+  //   }, 0);
+
+  //   return { ...obj, items: count };
+  // })
 
   if (dir.startsWith(root_dir)) {
     dir = dir.replace(root_dir, "")
   }
 
+  const fullPath = root_dir + dir;
+
   if (deep) {
     return dirContents
       .filter((_dir: any) => {
-        return _dir.filename.startsWith(root_dir + dir + '/')
+        return _dir.filename.startsWith(fullPath + '/')
       })
       .map((_dir: any) => {
         return {
@@ -66,13 +65,11 @@ export async function listContents(dir: string, deep: boolean = false, countItem
       })
 
   } else {
-    const partsLength = (root_dir + dir).split('/').length
-    const dirParts = (root_dir + dir).split('/')
+    const partsLength = fullPath.split('/').length
 
     return dirContents
       .filter((_dir: any) => {
-        const parts = _dir.filename.split('/')
-        return parts.length === partsLength + 1 && parts[parts.length - 2] === dirParts[dirParts.length - 1]
+        return _dir.filename.startsWith(fullPath + '/') && _dir.filename.split('/').length === partsLength + 1;
       })
       .map((_dir: any) => {
         return {
