@@ -82,12 +82,12 @@ export async function listContents(dir: string, deep: boolean = false, countItem
 }
 
 export async function getFileContent(filename: string) {
-  const buff: Buffer = await client.getFileContents(root_dir + filename)
+  const buff = await client.getFileContents(root_dir + filename)
   return buff
 }
 
 export async function getDownloadURL(filename: string) {
   // return await client.getFileDownloadLink(root_dir + filename)
-  const buff: Buffer = await client.getFileContents(root_dir + filename)
+  const buff = await client.getFileContents(root_dir + filename)
   return buff
 }

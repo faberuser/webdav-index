@@ -29,6 +29,18 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Deploying
+
+Build
+```bash
+npm run build
+```
+
+Start
+```bash
+npm run start
+```
+
 ## Screenshots
 
 ![Screenshot-1](https://media.discordapp.net/attachments/1274733447184777236/1274733639854194729/image.png?ex=66c353b7&is=66c20237&hm=36b06ead97ab717329c71ddcf3cf58e6d6763cf7aab205f393b4974d3726349d)
