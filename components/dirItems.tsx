@@ -1,5 +1,12 @@
 "use client"
 
+import path from "path"
+import { useState, useEffect } from "react"
+
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
+import { ToastAction } from "@/components/ui/toast"
 import {
     Tooltip,
     TooltipContent,
@@ -19,9 +26,15 @@ import {
     ImageIcon,
     LoadingIcon,
 } from "@/components/icons"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+
 
 export function DislayDir({ dir, onChange }: any) {
     return (
@@ -47,20 +60,63 @@ export function DislayDir({ dir, onChange }: any) {
     )
 }
 
-export function DisplayArchive({ dir }: any) {
+async function downloadFile(filepath: string) {
+    const response = await fetch(`/api/download?filename=${encodeURIComponent(filepath)}`)
+
+    if (!response.ok) {
+        throw new Error('Failed to download file')
+    }
+
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+
+    const filename = path.basename(filepath)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+}
+
+export function DisplayFile({ dir }: any) {
+    const { toast } = useToast()
+
     return (
         <HoverCard>
             <HoverCardTrigger asChild>
                 <div className="aspect-[1/1] w-full h-full group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 dark:border-gray-600">
-                    <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400">
+
+                    <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400"
+                        onClick={async (e) => {
+                            e.preventDefault()
+                            try {
+                                toast({
+                                    title: "File download started",
+                                    description: dir.basename,
+                                    action: (
+                                        <ToastAction altText="Yay">Yay</ToastAction>
+                                    ),
+                                })
+                                await downloadFile(dir.filename)
+                            } catch (error) {
+                                console.error('Failed to download file:', error)
+                            }
+                        }}
+                    >
                         <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
                     </Button>
-                    <div className="text-center truncate">
+
+                    <div className="text-center">
                         <div className="flex h-20 w-full items-center justify-center text-gray-500 dark:text-gray-400">
-                            <ZipIcon className="h-12 w-12" />
+                            {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
+                                <ZipIcon className="h-12 w-12" />
+                                :
+                                <FileIcon className="h-12 w-12" />
+                            }
                         </div>
                         <div className="relative mt-4">
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50">{dir.basename}</h3>
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
                         </div>
                     </div>
                 </div>
@@ -70,14 +126,14 @@ export function DisplayArchive({ dir }: any) {
                     <div className="space-y-1">
                         <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
                         <div className="flex items-center pt-2">
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted-foreground break-all">
                                 {dir.size} MB
                             </span>
                         </div>
                     </div>
                 </div>
             </HoverCardContent>
-        </HoverCard>
+        </HoverCard >
     )
 }
 
@@ -89,11 +145,11 @@ export function DisplayImage({ dir }: any) {
 
     const fetchContents = async () => {
         setIsLoading(true)
-        const filename = encodeURIComponent(dir.filename);
-        const response = await fetch(`/api/preview?type=image&filename=${filename}`);
-        const blob = await response.blob();
-        const objectURL = URL.createObjectURL(blob);
-        previewCache[dir.filename] = objectURL;
+        const filename = encodeURIComponent(dir.filename)
+        const response = await fetch(`/api/preview?filename=${filename}`)
+        const blob = await response.blob()
+        const objectURL = URL.createObjectURL(blob)
+        previewCache[dir.filename] = objectURL
         setPreview(objectURL)
         setIsLoading(false)
     }
@@ -107,12 +163,58 @@ export function DisplayImage({ dir }: any) {
     }, [])
 
     return (
-        <HoverCard>
-            <HoverCardTrigger asChild>
-                <div className="aspect-[1/1] w-full h-full group p-0 relative rounded-md border shadow-sm transition-all border-gray-200 dark:border-gray-600">
-                    <div className="flex h-full w-full items-center justify-center text-gray-500 dark:text-gray-400">
+        <Dialog>
+            <DialogTrigger>
+                <HoverCard>
+                    <HoverCardTrigger asChild>
+                        <div className="aspect-[1/1] w-full h-full group p-0 relative rounded-md border shadow-sm transition-all border-gray-200 dark:border-gray-600">
+                            <div className="flex h-full w-full items-center justify-center text-gray-500 dark:text-gray-400">
+                                {isLoading ?
+                                    <LoadingIcon className="h-24 w-24" />
+                                    :
+                                    <Image
+                                        src={preview}
+                                        alt={dir.basename}
+                                        width={0}
+                                        height={0}
+                                        sizes="100vw"
+                                        className="w-full h-full object-cover rounded-md"
+                                    />
+                                }
+                            </div>
+                        </div>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80 bg-white dark:bg-black">
+                        <div className="flex justify-between space-x-4">
+                            <div className="space-y-1 h-full w-full">
+                                <div className="flex justify-between">
+                                    <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
+                                    <span className="pt-1 text-xs text-muted-foreground break-all">
+                                        {dir.size} MB
+                                    </span>
+                                </div>
+                                {isLoading ?
+                                    <ImageIcon className="h-24 w-24" />
+                                    :
+                                    <Image
+                                        src={preview}
+                                        alt={dir.basename}
+                                        width={0}
+                                        height={0}
+                                        sizes="100vw"
+                                        className="w-full h-full object-cover rounded-md"
+                                    />}
+                            </div>
+                        </div>
+                    </HoverCardContent>
+                </HoverCard>
+            </DialogTrigger>
+            <DialogContent className="bg-white dark:bg-black">
+                <DialogHeader>
+                    <DialogTitle className="break-all pr-5">{dir.basename}</DialogTitle>
+                    <DialogDescription>
                         {isLoading ?
-                            <LoadingIcon className="h-24 w-24" />
+                            <ImageIcon className="h-64 w-64" />
                             :
                             <Image
                                 src={preview}
@@ -123,69 +225,9 @@ export function DisplayImage({ dir }: any) {
                                 className="w-full h-full object-cover"
                             />
                         }
-                    </div>
-                </div>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80 bg-white dark:bg-black">
-                <div className="flex justify-between space-x-4">
-                    <div className="space-y-1 h-full w-full">
-                        <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
-                        {isLoading ?
-                            <ImageIcon className="h-24 w-24" />
-                            :
-                            <Image
-                                src={preview}
-                                alt={dir.basename}
-                                width={0}
-                                height={0}
-                                sizes="100vw"
-                                className="w-full h-full object-cover"
-                            />}
-                        <div className="flex items-center pt-2">
-                            <span className="text-xs text-muted-foreground">
-                                {dir.size} MB
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </HoverCardContent>
-        </HoverCard>
-    )
-}
-
-export function DisplayFile({ dir }: any) {
-    return (
-        <HoverCard>
-            <HoverCardTrigger asChild>
-                <div className="aspect-[1/1] w-full h-full group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 dark:border-gray-600">
-                    <div className="text-center truncate">
-                        <div className="flex h-20 w-full items-center justify-center text-gray-500 dark:text-gray-400">
-                            <FileIcon className="h-12 w-12" />
-                        </div>
-                        <div className="relative mt-4">
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50">{dir.basename}</h3>
-                        </div>
-                    </div>
-                </div>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80 bg-white dark:bg-black">
-                <div className="flex justify-between space-x-4">
-                    <div className="space-y-1">
-                        <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
-                        {dir.basename.endsWith('.md') || dir.basename.endsWith('.txt') ?
-                            <p className="text-sm">
-                                Preview placeholder
-                            </p> :
-                            null
-                        }
-                        <div className="flex items-center pt-2">
-                            <span className="text-xs text-muted-foreground">
-                                {dir.size} MB
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </HoverCardContent>
-        </HoverCard>
+                    </DialogDescription>
+                </DialogHeader>
+            </DialogContent>
+        </Dialog>
     )
 }

@@ -1,6 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import * as utils from '@/lib/utils'
-
+export const config = {
+    api: {
+        responseLimit: false,
+    },
+}
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { filename } = req.query
     if (typeof filename === 'string') {

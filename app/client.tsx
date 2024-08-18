@@ -33,7 +33,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-import { DislayDir, DisplayArchive, DisplayImage, DisplayFile } from "@/components/dirItems"
+import { DislayDir, DisplayImage, DisplayFile } from "@/components/dirItems"
 
 const cache: any = {}
 
@@ -60,16 +60,16 @@ export default function Client({ title }: any) {
     }, [])
 
     function setNewPath(_path: any) {
-        setCurrentPath(_path);
+        setCurrentPath(_path)
     }
 
     useEffect(() => {
         if (cache[currentPath]) {
-            setDirItems(cache[currentPath]);
+            setDirItems(cache[currentPath])
         } else {
-            fetchContents();
+            fetchContents()
         }
-    }, [currentPath]);
+    }, [currentPath])
 
     return (
         <div className="flex h-screen w-full">
@@ -87,9 +87,9 @@ export default function Client({ title }: any) {
                     </Link>
                     <nav className="dirtree flex-1 space-y-2 overflow-auto">
 
-                        {rootDirItems.filter((dir: any) => dir.type === "directory").map((dir: any, index: number) => (
+                        {rootDirItems.filter((dir: any) => dir.type === "directory").map((dir: any) => (
                             <ListDirs
-                                key={index}
+                                key={dir.basename}
                                 dir={dir.basename}
                                 path={'/' + dir.basename}
                                 currentPath={currentPath}
@@ -120,7 +120,7 @@ export default function Client({ title }: any) {
                     </div>
                 </div>
                 <div className="flex-1 overflow-auto p-4 md:p-6">
-                    <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-9 auto-rows-min">
+                    <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9 auto-rows-min">
 
                         <AccessDir
                             items={dirItems}
@@ -139,6 +139,7 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
     const [isExpanded, setIsExpanded] = useState(false)
     const [dirItems, setDirItems] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    const [subDirs, setSubDirs] = useState([])
 
     const fetchContents = async () => {
         setIsLoading(true)
@@ -146,34 +147,36 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
         const json = await response.json()
         cache[path] = json
         setDirItems(json)
+        setSubDirs(json.filter((_dir: any) => _dir.type === "directory"))
         setIsLoading(false)
     }
 
     useEffect(() => {
         if (cache[path]) {
             setDirItems(cache[path])
+            setSubDirs(cache[path].filter((_dir: any) => _dir.type === "directory"))
         } else {
             fetchContents()
         }
     }, [])
 
     const handleExpand = () => {
-        setIsExpanded(!isExpanded)
-        if (!isExpanded) {
+        if (subDirs.length === 0) {
+            setIsExpanded(false)
+        } else {
+            setIsExpanded(!isExpanded)
+        }
+        if (!isExpanded || subDirs.length === 0) {
             onChange(path)
         }
     }
-
-    const subDirs = dirItems.filter((_dir: any) => _dir.type === "directory")
-    // const lastPath = currentPath.split('/').filter((x: string) => x).pop()
-    // console.log(lastPath, path)
 
     return (
         <div>
             <div style={{ cursor: 'pointer' }} onClick={handleExpand} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">
                 {isLoading && <LoadingIcon />}
                 {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
-                {/* {lastPath === dir ? <span className="font-semibold text-gray-200 dark:text-gray-800">{dir}</span> : dir} */}
+                {/* {currentPath.split('/').filter((x: string) => x).pop() === dir ? <span className="font-semibold text-gray-200 dark:text-gray-800">{dir}</span> : dir} */}
                 <TooltipProvider>
                     <Tooltip>
                         <div className="truncate">
@@ -187,8 +190,8 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
                     </Tooltip>
                 </TooltipProvider>
             </div>
-            {isExpanded && subDirs.map((subDir: any, index: number) => (
-                <div key={index} style={{ marginLeft: '10px' }}>
+            {isExpanded && subDirs.map((subDir: any) => (
+                <div key={subDir.basename} style={{ marginLeft: '10px' }}>
                     <ListDirs dir={subDir.basename} path={`${path}/${subDir.basename}`} isLoading={isLoading} onChange={onChange} />
                 </div>
             ))}
@@ -199,17 +202,14 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
 
 function AccessDir({ items, onChange }: any) {
     return (
-        items.map((dir: any, index: number) => (
+        items.map((dir: any) => (
             dir.type === 'directory' ?
-                <DislayDir key={index} dir={dir} onChange={onChange} />
+                <DislayDir key={dir.basename} dir={dir} onChange={onChange} />
                 :
-                dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
-                    <DisplayArchive key={index} dir={dir} />
+                dir.basename.endsWith('.png') || dir.basename.endsWith('.jpg') || dir.basename.endsWith('.jpeg') || dir.basename.endsWith('.gif') || dir.basename.endsWith('.avif') || dir.basename.endsWith('.webp') ?
+                    <DisplayImage key={dir.basename} dir={dir} />
                     :
-                    dir.basename.endsWith('.png') || dir.basename.endsWith('.jpg') || dir.basename.endsWith('.jpeg') || dir.basename.endsWith('.gif') || dir.basename.endsWith('.avif') || dir.basename.endsWith('.webp') ?
-                        <DisplayImage key={index} dir={dir} />
-                        :
-                        <DisplayFile key={index} dir={dir} />
+                    <DisplayFile key={dir.basename} dir={dir} />
         ))
     )
 }
@@ -266,7 +266,7 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                     </BreadcrumbSeparator>
 
                     <BreadcrumbItem>
-                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("/" + secondLastPath)}>{secondLastPath}</BreadcrumbPage>
+                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("/" + secondLastPath)} className="truncate">{secondLastPath}</BreadcrumbPage>
                     </BreadcrumbItem>
 
                     <BreadcrumbSeparator>
@@ -295,7 +295,7 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
 
                     <BreadcrumbItem>
                         <DropdownMenu>
-                            <DropdownMenuTrigger className="flex items-center gap-1">
+                            <DropdownMenuTrigger className="flex items-center gap-1 truncate">
                                 {secondLastPath}
                                 <ChevronDown className="h-4 w-4" />
                             </DropdownMenuTrigger>
@@ -311,7 +311,7 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                                             className="hover:bg-gray-200 dark:hover:bg-gray-800">
                                             <BreadcrumbPage >{value}</BreadcrumbPage>
                                         </DropdownMenuItem>
-                                    );
+                                    )
                                 })}
 
                             </DropdownMenuContent>

@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next"
 import "@/styles/globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
 import { title } from '@/config'
 
 const inter = Inter({
@@ -13,12 +14,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: title,
   description: "Interface Indexer for " + title,
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -30,8 +31,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }
