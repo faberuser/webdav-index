@@ -80,3 +80,16 @@ export async function listContents(dir: string, deep: boolean = false, countItem
   }
 
 }
+
+export async function getImagePreview(filename: string) {
+  const buff: Buffer = await client.getFileContents(root_dir + filename)
+  return buff
+}
+
+export async function getVideoPreview(filename: string) {
+  return await client.createReadStream(root_dir + filename)
+}
+
+export async function getTextPreview(filename: string) {
+  return await client.createReadStream(root_dir + filename)
+}

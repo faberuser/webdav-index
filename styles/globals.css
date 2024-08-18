@@ -106,3 +106,7 @@ h6 {
     background-color: var(--text-gray-ct-hover);
   }
 }
+
+.grid-auto-rows {
+  grid-auto-rows: 1fr;
+}

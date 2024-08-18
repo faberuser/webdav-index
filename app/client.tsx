@@ -120,7 +120,7 @@ export default function Client({ title }: any) {
                     </div>
                 </div>
                 <div className="flex-1 overflow-auto p-4 md:p-6">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                    <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-9 auto-rows-min">
 
                         <AccessDir
                             items={dirItems}

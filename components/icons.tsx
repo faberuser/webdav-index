@@ -114,9 +114,9 @@ export function ImageIcon(props: any) {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
         >
             <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
             <circle cx="9" cy="9" r="2" />
@@ -244,7 +244,7 @@ export function LoadingIcon(props: any) {
                 className="opacity-25"
                 cx="12" cy="12" r="10"
                 stroke="currentColor"
-                stroke-width="4"></circle>
+                strokeWidth="4"></circle>
             <path
                 className="opacity-75"
                 fill="currentColor"
@@ -265,7 +265,7 @@ export function LoadingIconLarge(props: any) {
                 className="opacity-25"
                 cx="12" cy="12" r="10"
                 stroke="currentColor"
-                stroke-width="4"></circle>
+                strokeWidth="4"></circle>
             <path
                 className="opacity-75"
                 fill="currentColor"
