@@ -1,4 +1,4 @@
-# (WIP) webdav-index
+# webdav-index
 Interface Indexer for WebDav
 
 ## Config
