@@ -3,11 +3,16 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/toggleMode"
-import { DownloadIcon, FolderIcon, FileIcon, MenuIcon, ArrowDownIcon, ArrowRightIcon, LoadingIcon, LoadingIconLarge, ZipIcon } from "@/components/icons"
 import { useState, useEffect } from "react"
-
 import { ChevronDown, Slash } from "lucide-react"
-
+import {
+    FolderIcon,
+    MenuIcon,
+    ArrowDownIcon,
+    ArrowRightIcon,
+    LoadingIcon,
+    LoadingIconLarge
+} from "@/components/icons"
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -21,6 +26,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+import { DislayDir, DisplayArchive, DisplayImage, DisplayFile } from "@/components/dirItems"
 
 const cache: any = {}
 
@@ -72,7 +85,7 @@ export default function Client({ title }: any) {
                         <FolderIcon className="h-6 w-6" />
                         <span>{title}</span>
                     </Link>
-                    <nav className="dirtree flex-1 space-y-2 overflow-auto text-gray-700 dark:text-gray-300">
+                    <nav className="dirtree flex-1 space-y-2 overflow-auto">
 
                         {rootDirItems.filter((dir: any) => dir.type === "directory").map((dir: any, index: number) => (
                             <ListDirs
@@ -157,13 +170,22 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
 
     return (
         <div>
-            <div style={{ cursor: 'pointer' }} onClick={handleExpand} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-200 dark:hover:bg-gray-800">
+            <div style={{ cursor: 'pointer' }} onClick={handleExpand} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">
                 {isLoading && <LoadingIcon />}
                 {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
-                {/* {lastPath === dir ? <span className="font-semibold text-blue-500">{dir}</span> : dir} */}
-                <div className="truncate">
-                    {dir}
-                </div>
+                {/* {lastPath === dir ? <span className="font-semibold text-gray-200 dark:text-gray-800">{dir}</span> : dir} */}
+                <TooltipProvider>
+                    <Tooltip>
+                        <div className="truncate">
+                            <TooltipTrigger>
+                                {dir}
+                            </TooltipTrigger>
+                        </div>
+                        <TooltipContent className="bg-white dark:bg-black">
+                            {dir}
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </div>
             {isExpanded && subDirs.map((subDir: any, index: number) => (
                 <div key={index} style={{ marginLeft: '10px' }}>
@@ -171,6 +193,7 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
                 </div>
             ))}
         </div>
+
     )
 }
 
@@ -178,35 +201,15 @@ function AccessDir({ items, onChange }: any) {
     return (
         items.map((dir: any, index: number) => (
             dir.type === 'directory' ?
-                <div style={{ cursor: 'pointer' }} key={index} onClick={() => onChange(dir.filename)} className="group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
-                    <div className="text-center">
-                        <div className="flex h-20 w-full items-center justify-center">
-                            <FolderIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
-                        </div>
-                        <div className="relative mt-4">
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
-                        </div>
-                    </div>
-                </div>
+                <DislayDir key={index} dir={dir} onChange={onChange} />
                 :
-                <div key={index} className="group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 dark:border-gray-600">
-                    <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400">
-                        <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
-                    </Button>
-                    <div className="text-center truncate">
-                        <div className="flex h-20 w-full items-center justify-center text-gray-500 dark:text-gray-400">
-                            {dir.basename.endsWith('.zip') ?
-                                <ZipIcon className="h-12 w-12" />
-                                :
-                                <FileIcon className="h-12 w-12" />
-                            }
-                        </div>
-                        <div className="relative mt-4">
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50">{dir.basename}</h3>
-                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{dir.size} MB</p>
-                        </div>
-                    </div>
-                </div>
+                dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
+                    <DisplayArchive key={index} dir={dir} />
+                    :
+                    dir.basename.endsWith('.png') || dir.basename.endsWith('.jpg') || dir.basename.endsWith('.jpeg') || dir.basename.endsWith('.gif') || dir.basename.endsWith('.avif') || dir.basename.endsWith('.webp') ?
+                        <DisplayImage key={index} dir={dir} />
+                        :
+                        <DisplayFile key={index} dir={dir} />
         ))
     )
 }
