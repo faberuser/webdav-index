@@ -7,6 +7,12 @@ Create a copy of `config-example.tsx` and remove `-example` with filled fields.
 
 Tested using Nextcloud as WebDav provider [link](https://docs.nextcloud.com/server/latest/user_manual/en/files/access_webdav.html#accessing-public-shares-over-webdav)
 
+## Install next.js
+
+```bash
+npm install next
+```
+
 ## Getting Started
 
 First, run the development server:
