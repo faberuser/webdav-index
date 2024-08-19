@@ -11,7 +11,8 @@ import {
     ArrowDownIcon,
     ArrowRightIcon,
     LoadingIcon,
-    LoadingIconLarge
+    LoadingIconLarge,
+    GitHubIcon
 } from "@/components/icons"
 import {
     Breadcrumb,
@@ -116,6 +117,12 @@ export default function Client({ title }: any) {
 
                     </div>
                     <div className="flex items-center gap-4">
+                        <a target="_blank" rel="noreferrer" href="https://github.com/faberuser/webdav-index">
+                            <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground py-2 h-8 w-8 px-0">
+                                <GitHubIcon className="h-5 w-5" />
+                                <span className="sr-only">GitHub</span>
+                            </div>
+                        </a>
                         <ModeToggle />
                     </div>
                 </div>
