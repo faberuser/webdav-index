@@ -72,9 +72,22 @@ export async function listContents(dir: string, deep: boolean = false, countItem
         return _dir.filename.startsWith(fullPath + '/') && _dir.filename.split('/').length === partsLength + 1
       })
       .map((_dir: any) => {
+        let thumbnailPath = null
+        if (_dir.type === 'directory') {
+          const imageFile = dirContents.find((file: any) =>
+            file.filename.startsWith(_dir.filename + '/') &&
+            file.filename.split('/').length === _dir.filename.split('/').length + 1 &&
+            file.type === 'file' &&
+            ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/gif', 'image/avif'].includes(file.mime)
+          )
+          if (imageFile) {
+            thumbnailPath = imageFile.filename.replace(root_dir, '')
+          }
+        }
         return {
           ..._dir,
-          filename: _dir.filename.replace(root_dir, '')
+          filename: _dir.filename.replace(root_dir, ''),
+          hasThumbnail: thumbnailPath
         }
       })
   }

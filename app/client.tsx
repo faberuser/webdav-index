@@ -89,7 +89,7 @@ export default function Client({ title }: any) {
 
                         {rootDirItems.filter((dir: any) => dir.type === "directory").map((dir: any) => (
                             <ListDirs
-                                key={dir.basename}
+                                key={dir.etag}
                                 dir={dir.basename}
                                 path={'/' + dir.basename}
                                 currentPath={currentPath}
@@ -137,7 +137,6 @@ export default function Client({ title }: any) {
 
 function ListDirs({ dir, path, currentPath = "", onChange }: any) {
     const [isExpanded, setIsExpanded] = useState(false)
-    const [dirItems, setDirItems] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [subDirs, setSubDirs] = useState([])
 
@@ -146,19 +145,17 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
         const response = await fetch(`/api/listContents?dir=${encodeURIComponent(path)}`)
         const json = await response.json()
         cache[path] = json
-        setDirItems(json)
         setSubDirs(json.filter((_dir: any) => _dir.type === "directory"))
         setIsLoading(false)
     }
 
     useEffect(() => {
         if (cache[path]) {
-            setDirItems(cache[path])
             setSubDirs(cache[path].filter((_dir: any) => _dir.type === "directory"))
         } else {
             fetchContents()
         }
-    }, [])
+    }, [path])
 
     const handleExpand = () => {
         if (subDirs.length === 0) {
@@ -191,7 +188,7 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
                 </TooltipProvider>
             </div>
             {isExpanded && subDirs.map((subDir: any) => (
-                <div key={subDir.basename} style={{ marginLeft: '10px' }}>
+                <div key={subDir.etag} style={{ marginLeft: '10px' }}>
                     <ListDirs dir={subDir.basename} path={`${path}/${subDir.basename}`} isLoading={isLoading} onChange={onChange} />
                 </div>
             ))}
@@ -204,12 +201,12 @@ function AccessDir({ items, onChange }: any) {
     return (
         items.map((dir: any) => (
             dir.type === 'directory' ?
-                <DislayDir key={dir.basename} dir={dir} onChange={onChange} />
+                <DislayDir key={dir.etag} dir={dir} onChange={onChange} />
                 :
                 dir.basename.endsWith('.png') || dir.basename.endsWith('.jpg') || dir.basename.endsWith('.jpeg') || dir.basename.endsWith('.gif') || dir.basename.endsWith('.avif') || dir.basename.endsWith('.webp') ?
-                    <DisplayImage key={dir.basename} dir={dir} />
+                    <DisplayImage key={dir.etag} dir={dir} />
                     :
-                    <DisplayFile key={dir.basename} dir={dir} />
+                    <DisplayFile key={dir.etag} dir={dir} />
         ))
     )
 }
