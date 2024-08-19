@@ -49,7 +49,7 @@ npm run start
 
 ### Todo
 
-- [ ] Image thumbnail up to one dir level
+- [x] Image thumbnail up to one dir level
 - [ ] Preview README.md in path and other text
 - [ ] Back/Forward
 - [ ] List view
