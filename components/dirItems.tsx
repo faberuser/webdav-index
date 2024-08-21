@@ -93,7 +93,7 @@ export function DislayDir({ dir, onChange }: any) {
                             <div className="flex justify-between">
                                 <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
                                 {/* <span className="pt-1 text-xs text-muted-foreground break-all">
-                                    {dir.size} MB
+                                    {dir.size} KB
                                 </span> */}
                             </div>
                             {isLoading ?
@@ -201,7 +201,7 @@ export function DisplayFile({ dir }: any) {
                         <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
                         <div className="flex items-center pt-2">
                             <span className="text-xs text-muted-foreground break-all">
-                                {dir.size} MB
+                                {dir.size < 1024 ? `${dir.size} Bytes` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
                             </span>
                         </div>
                     </div>
@@ -264,7 +264,7 @@ export function DisplayImage({ dir }: any) {
                                 <div className="flex justify-between">
                                     <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
                                     <span className="pt-1 text-xs text-muted-foreground break-all">
-                                        {dir.size} MB
+                                        {dir.size < 1024 ? `${dir.size} Bytes` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
                                     </span>
                                 </div>
                                 {isLoading ?
@@ -285,7 +285,12 @@ export function DisplayImage({ dir }: any) {
             </DialogTrigger>
             <DialogContent className="bg-white dark:bg-black">
                 <DialogHeader>
-                    <DialogTitle className="break-all pr-5">{dir.basename}</DialogTitle>
+                    <DialogTitle className="break-all pr-5 flex justify-between">
+                        <h4 className="text-md font-semibold break-all">{dir.basename}</h4>
+                        <span className="pt-1 text-xs text-muted-foreground break-all">
+                            {dir.size < 1024 ? `${dir.size} Bytes` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
+                        </span>
+                    </DialogTitle>
                     <DialogDescription>
                         {isLoading ?
                             <ImageIcon className="h-64 w-64" />
