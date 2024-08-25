@@ -77,24 +77,22 @@ export function DislayDir({ dir, onChange }: any) {
             <HoverCard>
                 <HoverCardTrigger asChild>
                     <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className="aspect-[1/1] w-full h-full group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
-                        <div className="text-center">
-                            <div className="flex h-20 w-full items-center justify-center">
-                                {isLoading ?
-                                    <LoadingIcon className="h-12 w-12" />
-                                    :
-                                    preview && <Image
-                                        src={preview}
-                                        alt={dir.basename}
-                                        width={0}
-                                        height={0}
-                                        sizes="100vw"
-                                        className="w-full h-full object-cover rounded-md"
-                                    />
-                                }
-                            </div>
-                            <div className="relative mt-4">
-                                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
-                            </div>
+                        <div className="h-3/4 w-full flex items-center justify-center">
+                            {isLoading ?
+                                <LoadingIcon className="h-12 w-12" />
+                                :
+                                preview && <Image
+                                    src={preview}
+                                    alt={dir.basename}
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="w-full h-full object-cover rounded-md"
+                                />
+                            }
+                        </div>
+                        <div className="h-1/4 w-full flex items-center justify-center">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
                         </div>
                     </div>
                 </HoverCardTrigger>
@@ -102,7 +100,9 @@ export function DislayDir({ dir, onChange }: any) {
                     <div className="flex justify-between space-x-4">
                         <div className="space-y-1 h-full w-full">
                             <div className="flex justify-between">
-                                <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
+                                <h4 className="text-sm font-semibold break-all">
+                                    {dir.basename}
+                                </h4>
                                 {/* <span className="pt-1 text-xs text-muted-foreground break-all">
                                     {dir.size} KB
                                 </span> */}
@@ -127,13 +127,11 @@ export function DislayDir({ dir, onChange }: any) {
                 <Tooltip>
                     <TooltipTrigger>
                         <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className="aspect-[1/1] w-full h-full group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
-                            <div className="text-center">
-                                <div className="flex h-20 w-full items-center justify-center">
-                                    <FolderIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
-                                </div>
-                                <div className="relative mt-4">
-                                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
-                                </div>
+                            <div className="h-3/4 w-full flex items-center justify-center">
+                                <FolderIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
+                            </div>
+                            <div className="h-1/4 w-full flex items-center justify-center">
+                                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
                             </div>
                         </div>
                     </TooltipTrigger>
@@ -262,13 +260,11 @@ export function DisplayTextFile({ dir }: any) {
                         <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
                     </Button>
 
-                    <div className="text-center">
-                        <div className="flex h-20 w-full items-center justify-center text-gray-500 dark:text-gray-400">
-                            <TextFileIcon className="h-12 w-12" />
-                        </div>
-                        <div className="relative mt-4">
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
-                        </div>
+                    <div className="h-3/4 w-full flex items-center justify-center">
+                        <TextFileIcon className="h-12 w-12 text-gray-500 dark:text-gray-400" />
+                    </div>
+                    <div className="h-1/4 w-full flex items-center justify-center">
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
                     </div>
 
                 </div>
