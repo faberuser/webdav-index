@@ -93,16 +93,16 @@ h6 {
 } */
 
 @layer utilities {
-  .dirtree::-webkit-scrollbar {
+  .ctscroll::-webkit-scrollbar {
     width: 3px;
     background-color: var(--background);
   }
 
-  .dirtree::-webkit-scrollbar-thumb {
+  .ctscroll::-webkit-scrollbar-thumb {
     background-color: var(--text-gray-ct);
   }
 
-  .dirtree::-webkit-scrollbar-thumb:hover {
+  .ctscroll::-webkit-scrollbar-thumb:hover {
     background-color: var(--text-gray-ct-hover);
   }
 }

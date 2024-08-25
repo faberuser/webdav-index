@@ -33,8 +33,13 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-
-import { DislayDir, DisplayImage, DisplayFile } from "@/components/dirItems"
+import {
+    DislayDir,
+    DisplayImage,
+    DisplayTextFile,
+    DisplayFile,
+    DisplayText
+} from "@/components/dirItems"
 
 const cache: any = {}
 
@@ -43,13 +48,19 @@ export default function Client({ title }: any) {
     const [dirItems, setDirItems] = useState([])
     const [currentPath, setCurrentPath] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [hasMD, setHasMD] = useState("")
 
     const fetchContents = async () => {
+        setHasMD("")
         setIsLoading(true)
         const response = await fetch(`/api/listContents?dir=${encodeURIComponent(currentPath)}`)
         const json = await response.json()
         cache[currentPath] = json
         setDirItems(json)
+        const mdFile = json.find((item: any) => item.basename.endsWith('.md'));
+        if (mdFile) {
+            setHasMD(mdFile.filename)
+        }
         if (rootDirItems.length === 0) {
             setRootDirItems(json)
         }
@@ -57,20 +68,21 @@ export default function Client({ title }: any) {
     }
 
     useEffect(() => {
-        fetchContents()
-    }, [])
-
-    function setNewPath(_path: any) {
-        setCurrentPath(_path)
-    }
-
-    useEffect(() => {
         if (cache[currentPath]) {
+            setHasMD("")
             setDirItems(cache[currentPath])
+            const mdFile = cache[currentPath].find((item: any) => item.basename.endsWith('.md'));
+            if (mdFile) {
+                setHasMD(mdFile.filename)
+            }
         } else {
             fetchContents()
         }
     }, [currentPath])
+
+    function setNewPath(_path: any) {
+        setCurrentPath(_path)
+    }
 
     return (
         <div className="flex h-screen w-full">
@@ -86,7 +98,7 @@ export default function Client({ title }: any) {
                         <FolderIcon className="h-6 w-6" />
                         <span>{title}</span>
                     </Link>
-                    <nav className="dirtree flex-1 space-y-2 overflow-auto">
+                    <nav className="ctscroll flex-1 space-y-2 overflow-auto">
 
                         {rootDirItems.filter((dir: any) => dir.type === "directory").map((dir: any) => (
                             <ListDirs
@@ -102,8 +114,8 @@ export default function Client({ title }: any) {
                 </div>
             </div>
 
-            <div className="flex flex-1 flex-col">
-                <div className="flex h-14 items-center justify-between border-b dark:border-gray-600 px-6">
+            <div className="flex flex-col h-screen w-full">
+                <div className="flex h-14 items-center justify-between border-b dark:border-gray-600 p-6">
                     <div className="flex items-center gap-4">
 
                         <Button variant="ghost" size="icon" className="lg:hidden">
@@ -126,16 +138,39 @@ export default function Client({ title }: any) {
                         <ModeToggle />
                     </div>
                 </div>
-                <div className="flex-1 overflow-auto p-4 md:p-6">
-                    <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9 auto-rows-min">
+                {hasMD ? (
+                    <div className="flex h-full overflow-hidden">
+                        <div className="flex-1 overflow-auto p-4 md:p-6 ctscroll">
+                            <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-7 auto-rows-min">
 
-                        <AccessDir
-                            items={dirItems}
-                            onChange={(_path: any) => setNewPath(_path)}
-                        />
+                                <AccessDir
+                                    items={dirItems}
+                                    onChange={(_path: any) => setNewPath(_path)}
+                                />
 
+                            </div>
+                        </div>
+                        <div className="hidden md:block w-80 border-l dark:border-gray-600 text-gray-700 dark:text-gray-300 p-4 overflow-auto ctscroll">
+                            <h2 className="text-lg font-semibold">
+                                {hasMD.split('/').filter((x: string) => x).pop()}
+                            </h2>
+                            <div className="whitespace-pre-wrap break-words">
+                                <DisplayText filename={hasMD} />
+                            </div>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="flex-1 h-full overflow-auto p-4 md:p-6">
+                        <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9 auto-rows-min">
+
+                            <AccessDir
+                                items={dirItems}
+                                onChange={(_path: any) => setNewPath(_path)}
+                            />
+
+                        </div>
+                    </div>
+                )}
             </div>
 
         </div>
@@ -178,12 +213,12 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
     return (
         <div>
             <div style={{ cursor: 'pointer' }} onClick={handleExpand} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">
-                {isLoading && <LoadingIcon />}
+                {isLoading && <LoadingIcon className="h-4 w-4" />}
                 {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
                 {/* {currentPath.split('/').filter((x: string) => x).pop() === dir ? <span className="font-semibold text-gray-200 dark:text-gray-800">{dir}</span> : dir} */}
                 <TooltipProvider>
                     <Tooltip>
-                        <div className="truncate">
+                        <div className="truncate w-full">
                             <TooltipTrigger>
                                 {dir}
                             </TooltipTrigger>
@@ -210,10 +245,15 @@ function AccessDir({ items, onChange }: any) {
             dir.type === 'directory' ?
                 <DislayDir key={dir.etag} dir={dir} onChange={onChange} />
                 :
-                dir.basename.endsWith('.png') || dir.basename.endsWith('.jpg') || dir.basename.endsWith('.jpeg') || dir.basename.endsWith('.gif') || dir.basename.endsWith('.avif') || dir.basename.endsWith('.webp') ?
+                dir.basename.endsWith('.png') || dir.basename.endsWith('.jpg') || dir.basename.endsWith('.jpeg') ||
+                    dir.basename.endsWith('.gif') || dir.basename.endsWith('.avif') || dir.basename.endsWith('.webp') ?
                     <DisplayImage key={dir.etag} dir={dir} />
                     :
-                    <DisplayFile key={dir.etag} dir={dir} />
+                    dir.basename.endsWith('.md') || dir.basename.endsWith('.txt') || dir.basename.endsWith('.json') ||
+                        dir.basename.endsWith('.ini') || dir.basename.endsWith('.log') ?
+                        <DisplayTextFile key={dir.etag} dir={dir} />
+                        :
+                        <DisplayFile key={dir.etag} dir={dir} />
         ))
     )
 }

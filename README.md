@@ -52,7 +52,7 @@ npm run start
 ### Todo
 
 - [x] Image thumbnail in immediate sub-dir
-- [ ] Preview README.md in path and other text
+- [x] Preview .md in path and other text files
 - [ ] Back/Forward
 - [ ] List view
 - [ ] Sort by name, last modified

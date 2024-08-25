@@ -102,3 +102,7 @@ export async function getDownloadURL(filename: string) {
   const downloadLink: string = client.getFileDownloadLink(root_dir + filename)
   return URL.createObjectURL(new Blob([downloadLink]))
 }
+
+export async function getTextContent(filename: string) {
+  return await client.getFileContents(root_dir + filename, { format: "text" })
+}
