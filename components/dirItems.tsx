@@ -76,12 +76,17 @@ export function DislayDir({ dir, onChange }: any) {
         dir.hasThumbnail != null ?
             <HoverCard>
                 <HoverCardTrigger asChild>
-                    <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className="aspect-[1/1] w-full h-full group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
-                        <div className="h-3/4 w-full flex items-center justify-center">
-                            {isLoading ?
-                                <LoadingIcon className="h-12 w-12" />
-                                :
-                                preview && <Image
+                    <div
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => onChange(dir.filename)}
+                        className="aspect-[1/1] w-full h-full group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
+
+                        {isLoading ?
+                            <DisplayIcon icon={<FolderIcon className="h-12 w-12" />} />
+                            :
+                            preview &&
+                            <DisplayIcon icon={
+                                <Image
                                     src={preview}
                                     alt={dir.basename}
                                     width={0}
@@ -89,11 +94,10 @@ export function DislayDir({ dir, onChange }: any) {
                                     sizes="100vw"
                                     className="w-full h-full object-cover rounded-md"
                                 />
-                            }
-                        </div>
-                        <div className="h-1/4 w-full flex items-center justify-center">
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
-                        </div>
+                            } />
+                        }
+                        <DisplayBasename dir={dir} />
+
                     </div>
                 </HoverCardTrigger>
                 <HoverCardContent className="w-80 bg-white dark:bg-black">
@@ -126,13 +130,12 @@ export function DislayDir({ dir, onChange }: any) {
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger>
-                        <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className="aspect-[1/1] w-full h-full group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
-                            <div className="h-3/4 w-full flex items-center justify-center">
-                                <FolderIcon className="h-12 w-12 text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300" />
-                            </div>
-                            <div className="h-1/4 w-full flex items-center justify-center">
-                                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
-                            </div>
+                        <div
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => onChange(dir.filename)}
+                            className="aspect-[1/1] w-full h-full group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
+                            <DisplayIcon icon={<FolderIcon className="h-12 w-12" />} />
+                            <DisplayBasename dir={dir} />
                         </div>
                     </TooltipTrigger>
                     <TooltipContent className="bg-white dark:bg-black">
@@ -171,6 +174,7 @@ export function DisplayImage({ dir }: any) {
         <Dialog>
             <DialogTrigger>
                 <div className="aspect-[1/1] w-full h-full group p-0 relative rounded-md border shadow-sm transition-all border-gray-200 dark:border-gray-600">
+
                     <div className="flex h-full w-full items-center justify-center text-gray-500 dark:text-gray-400">
                         {isLoading ?
                             <LoadingIcon className="h-24 w-24" />
@@ -185,6 +189,7 @@ export function DisplayImage({ dir }: any) {
                             />
                         }
                     </div>
+
                 </div>
             </DialogTrigger>
             <DialogContent className="bg-white dark:bg-black">
@@ -194,7 +199,7 @@ export function DisplayImage({ dir }: any) {
                             {dir.basename}
                         </h4>
                         <span className="text-xs text-muted-foreground text-nowrap flex items-center">
-                            {dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
+                            <DisplaySize dir={dir} />
                         </span>
                     </DialogTitle>
                     <DialogDescription>
@@ -246,7 +251,7 @@ export function DisplayTextFile({ dir }: any) {
                             try {
                                 toast({
                                     title: "File download started",
-                                    description: dir.basename + " with " + (dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`),
+                                    description: dir.basename + " with " + DisplaySize({ dir }),
                                     action: (
                                         <ToastAction altText="Yay">Yay</ToastAction>
                                     ),
@@ -260,12 +265,8 @@ export function DisplayTextFile({ dir }: any) {
                         <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
                     </Button>
 
-                    <div className="h-3/4 w-full flex items-center justify-center">
-                        <TextFileIcon className="h-12 w-12 text-gray-500 dark:text-gray-400" />
-                    </div>
-                    <div className="h-1/4 w-full flex items-center justify-center">
-                        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
-                    </div>
+                    <DisplayIcon icon={<TextFileIcon className="h-12 w-12" />} />
+                    <DisplayBasename dir={dir} />
 
                 </div>
             </SheetTrigger>
@@ -276,7 +277,7 @@ export function DisplayTextFile({ dir }: any) {
                             {dir.basename}
                         </h4>
                         <span className="text-xs text-muted-foreground pr-5 text-nowrap flex items-center">
-                            {dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
+                            <DisplaySize dir={dir} />
                         </span>
                     </SheetTitle>
                     <SheetDescription className="whitespace-pre-wrap break-words text-pretty">
@@ -328,7 +329,7 @@ export function DisplayFile({ dir }: any) {
                             try {
                                 toast({
                                     title: "File download started",
-                                    description: dir.basename + " with " + (dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`),
+                                    description: dir.basename + " with " + DisplaySize({ dir }),
                                     action: (
                                         <ToastAction altText="Yay">Yay</ToastAction>
                                     ),
@@ -342,18 +343,13 @@ export function DisplayFile({ dir }: any) {
                         <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
                     </Button>
 
-                    <div className="text-center">
-                        <div className="flex h-20 w-full items-center justify-center text-gray-500 dark:text-gray-400">
-                            {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
-                                <ZipIcon className="h-12 w-12" />
-                                :
-                                <FileIcon className="h-12 w-12" />
-                            }
-                        </div>
-                        <div className="relative mt-4">
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
-                        </div>
-                    </div>
+                    {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
+                        <DisplayIcon icon={<ZipIcon className="h-12 w-12" />} />
+                        :
+                        <DisplayIcon icon={<FileIcon className="h-12 w-12" />} />
+                    }
+                    <DisplayBasename dir={dir} />
+
                 </div>
             </HoverCardTrigger>
             <HoverCardContent className="w-80 bg-white dark:bg-black">
@@ -362,12 +358,36 @@ export function DisplayFile({ dir }: any) {
                         <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
                         <div className="flex items-center pt-2">
                             <span className="text-xs text-muted-foreground break-all">
-                                {dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
+                                <DisplaySize dir={dir} />
                             </span>
                         </div>
                     </div>
                 </div>
             </HoverCardContent>
         </HoverCard>
+    )
+}
+
+function DisplayBasename({ dir }: any) {
+    return (
+        <div className="h-1/4 w-full flex items-end justify-center">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
+                {dir.basename}
+            </h3>
+        </div>
+    )
+}
+
+function DisplayIcon({ icon }: any) {
+    return (
+        <div className="h-3/4 w-full flex items-center justify-center text-gray-500 dark:text-gray-400">
+            {icon}
+        </div>
+    )
+}
+
+function DisplaySize({ dir }: any) {
+    return (
+        dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`
     )
 }
