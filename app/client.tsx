@@ -154,7 +154,7 @@ export default function Client({ title }: any) {
                             <h2 className="text-lg font-semibold">
                                 {hasMD.split('/').filter((x: string) => x).pop()}
                             </h2>
-                            <div className="whitespace-pre-wrap break-words">
+                            <div className="text-sm whitespace-pre-wrap break-words text-pretty">
                                 <DisplayText filename={hasMD} />
                             </div>
                         </div>

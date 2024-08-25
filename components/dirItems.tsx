@@ -191,9 +191,11 @@ export function DisplayImage({ dir }: any) {
             </DialogTrigger>
             <DialogContent className="bg-white dark:bg-black">
                 <DialogHeader>
-                    <DialogTitle className="break-all pr-5 flex justify-between">
-                        <h4 className="text-md font-semibold">{dir.basename}</h4>
-                        <span className="pt-1 text-xs text-muted-foreground w-28">
+                    <DialogTitle className="break-all pr-5 flex justify-between gap-2">
+                        <h4 className="text-md font-semibold">
+                            {dir.basename}
+                        </h4>
+                        <span className="text-xs text-muted-foreground text-nowrap flex items-center">
                             {dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
                         </span>
                     </DialogTitle>
@@ -273,13 +275,15 @@ export function DisplayTextFile({ dir }: any) {
             </SheetTrigger>
             <SheetContent className="bg-white dark:bg-black overflow-auto ctscroll text-gray-700 dark:text-gray-300">
                 <SheetHeader>
-                    <SheetTitle className="break-all flex justify-between">
-                        <h4 className="text-md font-semibold">{dir.basename}</h4>
-                        <span className="text-xs text-muted-foreground pr-5 pt-2">
+                    <SheetTitle className="break-all flex justify-between gap-2">
+                        <h4 className="text-md font-semibold">
+                            {dir.basename}
+                        </h4>
+                        <span className="text-xs text-muted-foreground pr-5 text-nowrap flex items-center">
                             {dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
                         </span>
                     </SheetTitle>
-                    <SheetDescription className="whitespace-pre-wrap break-words">
+                    <SheetDescription className="whitespace-pre-wrap break-words text-pretty">
                         <DisplayText filename={dir.filename} />
                     </SheetDescription>
                 </SheetHeader>
@@ -287,6 +291,8 @@ export function DisplayTextFile({ dir }: any) {
         </Sheet>
     )
 }
+
+const textCache: any = {}
 
 export function DisplayText({ filename }: any) {
     const [text, setText] = useState("")
@@ -296,11 +302,17 @@ export function DisplayText({ filename }: any) {
         if (!response.ok) {
             throw new Error('Failed to download file')
         }
-        setText(await response.text())
+        const text = await response.text()
+        setText(text)
+        textCache[filename] = text
     }
 
     useEffect(() => {
-        getText()
+        if (textCache[filename]) {
+            setText(textCache[filename])
+        } else {
+            getText()
+        }
     }, [filename])
 
     return (text)
