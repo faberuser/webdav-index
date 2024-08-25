@@ -35,6 +35,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 
+const previewCache: any = {}
 
 export function DislayDir({ dir, onChange }: any) {
     const [preview, setPreview] = useState("")
@@ -134,84 +135,6 @@ export function DislayDir({ dir, onChange }: any) {
     )
 }
 
-async function downloadFile(filepath: string) {
-    const response = await fetch(`/api/download?filename=${encodeURIComponent(filepath)}`)
-
-    if (!response.ok) {
-        throw new Error('Failed to download file')
-    }
-
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
-
-    const filename = path.basename(filepath)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-}
-
-export function DisplayFile({ dir }: any) {
-    const { toast } = useToast()
-
-    return (
-        <HoverCard>
-            <HoverCardTrigger asChild>
-                <div className="aspect-[1/1] w-full h-full group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 dark:border-gray-600">
-
-                    <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400"
-                        onClick={async (e) => {
-                            e.preventDefault()
-                            try {
-                                toast({
-                                    title: "File download started",
-                                    description: dir.basename,
-                                    action: (
-                                        <ToastAction altText="Yay">Yay</ToastAction>
-                                    ),
-                                })
-                                await downloadFile(dir.filename)
-                            } catch (error) {
-                                console.error('Failed to download file:', error)
-                            }
-                        }}
-                    >
-                        <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
-                    </Button>
-
-                    <div className="text-center">
-                        <div className="flex h-20 w-full items-center justify-center text-gray-500 dark:text-gray-400">
-                            {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
-                                <ZipIcon className="h-12 w-12" />
-                                :
-                                <FileIcon className="h-12 w-12" />
-                            }
-                        </div>
-                        <div className="relative mt-4">
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
-                        </div>
-                    </div>
-                </div>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80 bg-white dark:bg-black">
-                <div className="flex justify-between space-x-4">
-                    <div className="space-y-1">
-                        <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
-                        <div className="flex items-center pt-2">
-                            <span className="text-xs text-muted-foreground break-all">
-                                {dir.size < 1024 ? `${dir.size} Bytes` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </HoverCardContent>
-        </HoverCard >
-    )
-}
-
-const previewCache: any = {}
 
 export function DisplayImage({ dir }: any) {
     const [preview, setPreview] = useState("")
@@ -264,7 +187,7 @@ export function DisplayImage({ dir }: any) {
                                 <div className="flex justify-between">
                                     <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
                                     <span className="pt-1 text-xs text-muted-foreground break-all">
-                                        {dir.size < 1024 ? `${dir.size} Bytes` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
+                                        {dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
                                     </span>
                                 </div>
                                 {isLoading ?
@@ -288,7 +211,7 @@ export function DisplayImage({ dir }: any) {
                     <DialogTitle className="break-all pr-5 flex justify-between">
                         <h4 className="text-md font-semibold break-all">{dir.basename}</h4>
                         <span className="pt-1 text-xs text-muted-foreground break-all">
-                            {dir.size < 1024 ? `${dir.size} Bytes` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
+                            {dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
                         </span>
                     </DialogTitle>
                     <DialogDescription>
@@ -308,5 +231,78 @@ export function DisplayImage({ dir }: any) {
                 </DialogHeader>
             </DialogContent>
         </Dialog>
+    )
+}
+
+async function downloadFile(filepath: string) {
+    const response = await fetch(`/api/download?filename=${encodeURIComponent(filepath)}`)
+
+    if (!response.ok) {
+        throw new Error('Failed to download file')
+    }
+
+    const link = document.createElement('a')
+    link.href = response.url
+    link.download = path.basename(filepath)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+}
+
+export function DisplayFile({ dir }: any) {
+    const { toast } = useToast()
+
+    return (
+        <HoverCard>
+            <HoverCardTrigger asChild>
+                <div className="aspect-[1/1] w-full h-full group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 dark:border-gray-600">
+
+                    <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400"
+                        onClick={async (e) => {
+                            e.preventDefault()
+                            try {
+                                toast({
+                                    title: "File download started",
+                                    description: dir.basename + " with " + (dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`),
+                                    action: (
+                                        <ToastAction altText="Yay">Yay</ToastAction>
+                                    ),
+                                })
+                                await downloadFile(dir.filename)
+                            } catch (error) {
+                                console.error('Failed to download file:', error)
+                            }
+                        }}
+                    >
+                        <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
+                    </Button>
+
+                    <div className="text-center">
+                        <div className="flex h-20 w-full items-center justify-center text-gray-500 dark:text-gray-400">
+                            {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
+                                <ZipIcon className="h-12 w-12" />
+                                :
+                                <FileIcon className="h-12 w-12" />
+                            }
+                        </div>
+                        <div className="relative mt-4">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</h3>
+                        </div>
+                    </div>
+                </div>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-80 bg-white dark:bg-black">
+                <div className="flex justify-between space-x-4">
+                    <div className="space-y-1">
+                        <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
+                        <div className="flex items-center pt-2">
+                            <span className="text-xs text-muted-foreground break-all">
+                                {dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </HoverCardContent>
+        </HoverCard >
     )
 }

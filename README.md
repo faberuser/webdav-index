@@ -7,6 +7,8 @@ Create a copy of `config-example.tsx` and remove `-example` with filled fields.
 
 Tested using Nextcloud as WebDav provider [link](https://docs.nextcloud.com/server/latest/user_manual/en/files/access_webdav.html#accessing-public-shares-over-webdav)
 
+**Important: Public account/share dir is recommended because download URL will expose your credentials**
+
 ## Install next.js
 
 ```bash
@@ -49,7 +51,7 @@ npm run start
 
 ### Todo
 
-- [x] Image thumbnail up to one dir level
+- [x] Image thumbnail in immediate sub-dir
 - [ ] Preview README.md in path and other text
 - [ ] Back/Forward
 - [ ] List view

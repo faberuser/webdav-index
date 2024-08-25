@@ -1,10 +1,10 @@
+import { root_dir, remoteURL, username, password } from "@/config"
+
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { createClient } from "webdav"
 import NodeCache from 'node-cache'
 import https from 'https'
-
-import { root_dir, remoteURL, username, password } from "@/config"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -95,12 +95,10 @@ export async function listContents(dir: string, deep: boolean = false, countItem
 }
 
 export async function getFileContent(filename: string) {
-  const buff = await client.getFileContents(root_dir + filename)
-  return buff
+  return await client.getFileContents(root_dir + filename)
 }
 
 export async function getDownloadURL(filename: string) {
-  // return await client.getFileDownloadLink(root_dir + filename)
-  const buff = await client.getFileContents(root_dir + filename)
-  return buff
+  const downloadLink: string = client.getFileDownloadLink(root_dir + filename)
+  return URL.createObjectURL(new Blob([downloadLink]))
 }
