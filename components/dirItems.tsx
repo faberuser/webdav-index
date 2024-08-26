@@ -2,8 +2,16 @@
 
 import path from "path"
 import { useState, useEffect } from "react"
-
 import Image from "next/image"
+import {
+    DownloadIcon,
+    FolderIcon,
+    FileIcon,
+    ZipIcon,
+    ImageIcon,
+    LoadingIcon,
+    TextFileIcon
+} from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { ToastAction } from "@/components/ui/toast"
@@ -18,15 +26,6 @@ import {
     HoverCardContent,
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
-import {
-    DownloadIcon,
-    FolderIcon,
-    FileIcon,
-    ZipIcon,
-    ImageIcon,
-    LoadingIcon,
-    TextFileIcon
-} from "@/components/icons"
 import {
     Dialog,
     DialogContent,
@@ -44,8 +43,51 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 
-
 const previewCache: any = {}
+const textCache: any = {}
+const toastTitle = ({ dir }: any) =>
+    "Downloading file with " + DisplaySize({ dir })
+const toastDescription = ({ dir }: any) =>
+    dir.basename
+
+function DisplayBasename({ dir }: any) {
+    return (
+        <div className="h-1/4 w-full flex items-end justify-center">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
+                {dir.basename}
+            </h3>
+        </div>
+    )
+}
+
+function DisplayIcon({ icon }: any) {
+    return (
+        <div className="h-3/4 w-full flex items-center justify-center text-gray-500 dark:text-gray-400">
+            {icon}
+        </div>
+    )
+}
+
+function DisplaySize({ dir }: any) {
+    return (
+        dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`
+    )
+}
+
+async function downloadFile(filepath: string) {
+    const response = await fetch(`/api/download?filename=${encodeURIComponent(filepath)}`)
+
+    if (!response.ok) {
+        throw new Error('Failed to download file')
+    }
+
+    const link = document.createElement('a')
+    link.href = response.url
+    link.download = path.basename(filepath)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+}
 
 export function DislayDir({ dir, onChange }: any) {
     const [preview, setPreview] = useState("")
@@ -222,21 +264,6 @@ export function DisplayImage({ dir }: any) {
     )
 }
 
-async function downloadFile(filepath: string) {
-    const response = await fetch(`/api/download?filename=${encodeURIComponent(filepath)}`)
-
-    if (!response.ok) {
-        throw new Error('Failed to download file')
-    }
-
-    const link = document.createElement('a')
-    link.href = response.url
-    link.download = path.basename(filepath)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-}
-
 export function DisplayTextFile({ dir }: any) {
     const { toast } = useToast()
 
@@ -252,8 +279,8 @@ export function DisplayTextFile({ dir }: any) {
                             e.preventDefault()
                             try {
                                 toast({
-                                    title: "File download started",
-                                    description: dir.basename + " with " + DisplaySize({ dir }),
+                                    title: toastTitle({ dir }),
+                                    description: toastDescription({ dir }),
                                     action: (
                                         <ToastAction altText="Yay">Yay</ToastAction>
                                     ),
@@ -290,8 +317,6 @@ export function DisplayTextFile({ dir }: any) {
         </Sheet>
     )
 }
-
-const textCache: any = {}
 
 export function DisplayText({ filename }: any) {
     const [text, setText] = useState("")
@@ -330,8 +355,8 @@ export function DisplayFile({ dir }: any) {
                             e.preventDefault()
                             try {
                                 toast({
-                                    title: "File download started",
-                                    description: dir.basename + " with " + DisplaySize({ dir }),
+                                    title: toastTitle({ dir }),
+                                    description: toastDescription({ dir }),
                                     action: (
                                         <ToastAction altText="Yay">Yay</ToastAction>
                                     ),
@@ -367,29 +392,5 @@ export function DisplayFile({ dir }: any) {
                 </div>
             </HoverCardContent>
         </HoverCard>
-    )
-}
-
-function DisplayBasename({ dir }: any) {
-    return (
-        <div className="h-1/4 w-full flex items-end justify-center">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
-                {dir.basename}
-            </h3>
-        </div>
-    )
-}
-
-function DisplayIcon({ icon }: any) {
-    return (
-        <div className="h-3/4 w-full flex items-center justify-center text-gray-500 dark:text-gray-400">
-            {icon}
-        </div>
-    )
-}
-
-function DisplaySize({ dir }: any) {
-    return (
-        dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`
     )
 }
