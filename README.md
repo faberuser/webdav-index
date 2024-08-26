@@ -45,9 +45,9 @@ npm run start
 
 ## Screenshots
 
-![Screenshot-1](https://nextcloud.k-clowd.top/apps/files_sharing/publicpreview/ZJycLzxFLcd3TdM?file=/&fileId=783141&x=1366&y=768&a=true&etag=2d8116cd84998288352f60852b6feffe)
+![webdav-index-0](https://github.com/user-attachments/assets/fabe8c2b-5c0e-49fe-af31-899bde83d155)
 
-![Screenshot-2](https://nextcloud.k-clowd.top/apps/files_sharing/publicpreview/DMWGjnByziWs24K?file=/&fileId=783140&x=1366&y=768&a=true&etag=a78353e4fea824724c102e59b6dc92a2)
+![webdav-index-1](https://github.com/user-attachments/assets/a2581389-acab-4cf0-8190-04685712de3c)
 
 ### Todo
 
