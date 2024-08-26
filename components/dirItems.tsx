@@ -243,7 +243,9 @@ export function DisplayTextFile({ dir }: any) {
     return (
         <Sheet>
             <SheetTrigger asChild>
-                <div className="aspect-[1/1] w-full h-full group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 dark:border-gray-600">
+                <div
+                    style={{ cursor: 'pointer' }}
+                    className="aspect-[1/1] w-full h-full group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 dark:border-gray-600">
 
                     <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400"
                         onClick={async (e) => {
