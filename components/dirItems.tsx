@@ -251,7 +251,7 @@ export function DisplayImage({ dir }: any) {
 
     return (
         <Dialog>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <div className={cardClass("p-0")}>
                     <div className="flex h-full w-full items-center justify-center text-gray-500 dark:text-gray-400">
                         <DisplayDownloadButton dir={dir} />
@@ -278,21 +278,19 @@ export function DisplayImage({ dir }: any) {
                             <DisplaySize dir={dir} />
                         </span>
                     </DialogTitle>
-                    <DialogDescription>
-                        <div className="flex items-center justify-center">
-                            {isLoading ?
-                                <ImageIcon className="h-64 w-64" />
-                                :
-                                preview && <Image
-                                    src={preview}
-                                    alt={dir.basename}
-                                    width={0}
-                                    height={0}
-                                    sizes="100vw"
-                                    className="max-h-[90vh] max-w-[90vw] w-auto h-full"
-                                />
-                            }
-                        </div>
+                    <DialogDescription className="flex items-center justify-center">
+                        {isLoading ?
+                            <ImageIcon className="h-64 w-64" />
+                            :
+                            preview && <Image
+                                src={preview}
+                                alt={dir.basename}
+                                width={0}
+                                height={0}
+                                sizes="100vw"
+                                className="max-h-[90vh] max-w-[90vw] w-auto h-full"
+                            />
+                        }
                     </DialogDescription>
                 </DialogHeader>
             </DialogContent>
@@ -304,7 +302,7 @@ export function DisplayImage({ dir }: any) {
 export function DisplayVideo({ dir }: any) {
     return (
         <Dialog>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <div style={{ cursor: 'pointer' }} className={cardClass("")}>
                     <DisplayDownloadButton dir={dir} />
                     <DisplayIcon icon={<VideoIcon className="h-12 w-12" />} />
@@ -319,16 +317,14 @@ export function DisplayVideo({ dir }: any) {
                             <DisplaySize dir={dir} />
                         </span>
                     </DialogTitle>
-                    <DialogDescription>
-                        <div className="flex items-center justify-center">
-                            <video
-                                src={`/api/video?filename=${dir.filename}`} controls
-                                width={0}
-                                height={0}
-                                className="max-h-[90vh] max-w-[90vw] w-auto h-full"
-                            >
-                            </video>
-                        </div>
+                    <DialogDescription className="flex items-center justify-center">
+                        <video
+                            src={`/api/video?filename=${dir.filename}`} controls
+                            width={0}
+                            height={0}
+                            className="max-h-[90vh] max-w-[90vw] w-auto h-full"
+                        >
+                        </video>
                     </DialogDescription>
                 </DialogHeader>
             </DialogContent>
