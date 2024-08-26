@@ -10,7 +10,8 @@ import {
     ZipIcon,
     ImageIcon,
     LoadingIcon,
-    TextFileIcon
+    TextFileIcon,
+    VideoIcon,
 } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
@@ -43,12 +44,34 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 
+
 const previewCache: any = {}
 const textCache: any = {}
+
 const toastTitle = ({ dir }: any) =>
     "Downloading file with " + DisplaySize({ dir })
+
 const toastDescription = ({ dir }: any) =>
     dir.basename
+
+const backgroundClass = (props: any) =>
+    props + " bg-white dark:bg-black"
+
+const muteTextClass = (props: any) =>
+    props + " text-xs text-muted-foreground text-nowrap flex items-center"
+
+const nameTitleClass = (props: any) =>
+    props + " flex justify-between gap-2 break-all"
+
+
+function cardClass(props: any) {
+    let padding = "p-4"
+    if (props.includes("p-")) {
+        padding = ""
+    }
+    return props + padding + " relative aspect-[1/1] w-full h-full rounded-md shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
+}
+
 
 function DisplayBasename({ dir }: any) {
     return (
@@ -60,6 +83,7 @@ function DisplayBasename({ dir }: any) {
     )
 }
 
+
 function DisplayIcon({ icon }: any) {
     return (
         <div className="h-3/4 w-full flex items-center justify-center text-gray-500 dark:text-gray-400">
@@ -68,11 +92,40 @@ function DisplayIcon({ icon }: any) {
     )
 }
 
+
 function DisplaySize({ dir }: any) {
     return (
         dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`
     )
 }
+
+
+function DisplayDownloadButton({ dir }: any) {
+    const { toast } = useToast()
+
+    return (
+        <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400"
+            onClick={async (e) => {
+                e.preventDefault()
+                try {
+                    toast({
+                        title: toastTitle({ dir }),
+                        description: toastDescription({ dir }),
+                        action: (
+                            <ToastAction altText="Yay">Yay</ToastAction>
+                        ),
+                    })
+                    await downloadFile(dir.filename)
+                } catch (error) {
+                    console.error('Failed to download file:', error)
+                }
+            }}
+        >
+            <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
+        </Button>
+    )
+}
+
 
 async function downloadFile(filepath: string) {
     const response = await fetch(`/api/download?filename=${encodeURIComponent(filepath)}`)
@@ -88,6 +141,7 @@ async function downloadFile(filepath: string) {
     link.click()
     document.body.removeChild(link)
 }
+
 
 export function DislayDir({ dir, onChange }: any) {
     const [preview, setPreview] = useState("")
@@ -118,11 +172,7 @@ export function DislayDir({ dir, onChange }: any) {
         dir.hasThumbnail != null ?
             <HoverCard>
                 <HoverCardTrigger asChild>
-                    <div
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => onChange(dir.filename)}
-                        className="aspect-[1/1] w-full h-full group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
-
+                    <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className={cardClass("")}>
                         {isLoading ?
                             <DisplayIcon icon={<LoadingIcon className="h-12 w-12" />} />
                             :
@@ -139,48 +189,35 @@ export function DislayDir({ dir, onChange }: any) {
                             } />
                         }
                         <DisplayBasename dir={dir} />
-
                     </div>
                 </HoverCardTrigger>
-                <HoverCardContent className="w-80 bg-white dark:bg-black">
-                    <div className="flex justify-between space-x-4">
-                        <div className="space-y-1 h-full w-full">
-                            <div className="flex justify-between">
-                                <h4 className="text-sm font-semibold break-all">
-                                    {dir.basename}
-                                </h4>
-                                {/* <span className="pt-1 text-xs text-muted-foreground break-all">
-                                    {dir.size} KB
-                                </span> */}
-                            </div>
-                            {isLoading ?
-                                <ImageIcon className="h-24 w-24" />
-                                :
-                                preview && <Image
-                                    src={preview}
-                                    alt={dir.basename}
-                                    width={0}
-                                    height={0}
-                                    sizes="100vw"
-                                    className="w-full h-full object-cover rounded-md"
-                                />}
+                <HoverCardContent className={backgroundClass("")}>
+                    {dir.basename}
+                    {isLoading ?
+                        <div className="flex items-center justify-center">
+                            <ImageIcon className="h-24 w-24" />
                         </div>
-                    </div>
+                        :
+                        preview && <Image
+                            src={preview}
+                            alt={dir.basename}
+                            width={0}
+                            height={0}
+                            sizes="100vw"
+                            className="w-full h-full rounded-md"
+                        />}
                 </HoverCardContent>
             </HoverCard>
             :
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger>
-                        <div
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => onChange(dir.filename)}
-                            className="aspect-[1/1] w-full h-full group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
+                        <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className={cardClass("")}>
                             <DisplayIcon icon={<FolderIcon className="h-12 w-12" />} />
                             <DisplayBasename dir={dir} />
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent className="bg-white dark:bg-black">
+                    <TooltipContent className={backgroundClass("")}>
                         {dir.basename}
                     </TooltipContent>
                 </Tooltip>
@@ -215,9 +252,9 @@ export function DisplayImage({ dir }: any) {
     return (
         <Dialog>
             <DialogTrigger>
-                <div className="aspect-[1/1] w-full h-full group p-0 relative rounded-md border shadow-sm transition-all border-gray-200 dark:border-gray-600">
-
+                <div className={cardClass("p-0")}>
                     <div className="flex h-full w-full items-center justify-center text-gray-500 dark:text-gray-400">
+                        <DisplayDownloadButton dir={dir} />
                         {isLoading ?
                             <LoadingIcon className="h-24 w-24" />
                             :
@@ -231,32 +268,67 @@ export function DisplayImage({ dir }: any) {
                             />
                         }
                     </div>
-
                 </div>
             </DialogTrigger>
-            <DialogContent className="bg-white dark:bg-black">
+            <DialogContent className={backgroundClass("max-w-min max-h-screen")}>
                 <DialogHeader>
-                    <DialogTitle className="break-all pr-5 flex justify-between gap-2">
-                        <h4 className="text-md font-semibold">
-                            {dir.basename}
-                        </h4>
-                        <span className="text-xs text-muted-foreground text-nowrap flex items-center">
+                    <DialogTitle className={nameTitleClass("pr-5")}>
+                        {dir.basename}
+                        <span className={muteTextClass("")}>
                             <DisplaySize dir={dir} />
                         </span>
                     </DialogTitle>
                     <DialogDescription>
-                        {isLoading ?
-                            <ImageIcon className="h-64 w-64" />
-                            :
-                            preview && <Image
-                                src={preview}
-                                alt={dir.basename}
+                        <div className="flex items-center justify-center">
+                            {isLoading ?
+                                <ImageIcon className="h-64 w-64" />
+                                :
+                                preview && <Image
+                                    src={preview}
+                                    alt={dir.basename}
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="max-h-[90vh] max-w-[90vw] w-auto h-full"
+                                />
+                            }
+                        </div>
+                    </DialogDescription>
+                </DialogHeader>
+            </DialogContent>
+        </Dialog >
+    )
+}
+
+
+export function DisplayVideo({ dir }: any) {
+    return (
+        <Dialog>
+            <DialogTrigger>
+                <div style={{ cursor: 'pointer' }} className={cardClass("")}>
+                    <DisplayDownloadButton dir={dir} />
+                    <DisplayIcon icon={<VideoIcon className="h-12 w-12" />} />
+                    <DisplayBasename dir={dir} />
+                </div>
+            </DialogTrigger>
+            <DialogContent className={backgroundClass("max-w-min max-h-screen")}>
+                <DialogHeader>
+                    <DialogTitle className={nameTitleClass("pr-5")}>
+                        {dir.basename}
+                        <span className={muteTextClass("")}>
+                            <DisplaySize dir={dir} />
+                        </span>
+                    </DialogTitle>
+                    <DialogDescription>
+                        <div className="flex items-center justify-center">
+                            <video
+                                src={`/api/video?filename=${dir.filename}`} controls
                                 width={0}
                                 height={0}
-                                sizes="100vw"
-                                className="w-full h-full object-cover"
-                            />
-                        }
+                                className="max-h-[90vh] max-w-[90vw] w-auto h-full"
+                            >
+                            </video>
+                        </div>
                     </DialogDescription>
                 </DialogHeader>
             </DialogContent>
@@ -264,48 +336,22 @@ export function DisplayImage({ dir }: any) {
     )
 }
 
-export function DisplayTextFile({ dir }: any) {
-    const { toast } = useToast()
 
+export function DisplayTextFile({ dir }: any) {
     return (
         <Sheet>
             <SheetTrigger asChild>
-                <div
-                    style={{ cursor: 'pointer' }}
-                    className="aspect-[1/1] w-full h-full group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 dark:border-gray-600">
-
-                    <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400"
-                        onClick={async (e) => {
-                            e.preventDefault()
-                            try {
-                                toast({
-                                    title: toastTitle({ dir }),
-                                    description: toastDescription({ dir }),
-                                    action: (
-                                        <ToastAction altText="Yay">Yay</ToastAction>
-                                    ),
-                                })
-                                await downloadFile(dir.filename)
-                            } catch (error) {
-                                console.error('Failed to download file:', error)
-                            }
-                        }}
-                    >
-                        <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
-                    </Button>
-
+                <div style={{ cursor: 'pointer' }} className={cardClass("")}>
+                    <DisplayDownloadButton dir={dir} />
                     <DisplayIcon icon={<TextFileIcon className="h-12 w-12" />} />
                     <DisplayBasename dir={dir} />
-
                 </div>
             </SheetTrigger>
-            <SheetContent className="bg-white dark:bg-black overflow-auto ctscroll text-gray-700 dark:text-gray-300">
+            <SheetContent className={backgroundClass("overflow-auto ctscroll text-gray-700 dark:text-gray-300")}>
                 <SheetHeader>
-                    <SheetTitle className="break-all flex justify-between gap-2">
-                        <h4 className="text-md font-semibold">
-                            {dir.basename}
-                        </h4>
-                        <span className="text-xs text-muted-foreground pr-5 text-nowrap flex items-center">
+                    <SheetTitle className={nameTitleClass("")}>
+                        {dir.basename}
+                        <span className={muteTextClass("pr-5")}>
                             <DisplaySize dir={dir} />
                         </span>
                     </SheetTitle>
@@ -314,9 +360,10 @@ export function DisplayTextFile({ dir }: any) {
                     </SheetDescription>
                 </SheetHeader>
             </SheetContent>
-        </Sheet>
+        </Sheet >
     )
 }
+
 
 export function DisplayText({ filename }: any) {
     const [text, setText] = useState("")
@@ -342,52 +389,28 @@ export function DisplayText({ filename }: any) {
     return (text)
 }
 
-export function DisplayFile({ dir }: any) {
-    const { toast } = useToast()
 
+export function DisplayFile({ dir }: any) {
     return (
         <HoverCard>
             <HoverCardTrigger asChild>
-                <div className="aspect-[1/1] w-full h-full group relative rounded-md border p-4 shadow-sm transition-all border-gray-200 dark:border-gray-600">
-
-                    <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400"
-                        onClick={async (e) => {
-                            e.preventDefault()
-                            try {
-                                toast({
-                                    title: toastTitle({ dir }),
-                                    description: toastDescription({ dir }),
-                                    action: (
-                                        <ToastAction altText="Yay">Yay</ToastAction>
-                                    ),
-                                })
-                                await downloadFile(dir.filename)
-                            } catch (error) {
-                                console.error('Failed to download file:', error)
-                            }
-                        }}
-                    >
-                        <DownloadIcon className="h-4 w-4 text-gray-900 dark:text-gray-300" />
-                    </Button>
-
+                <div className={cardClass("")}>
+                    <DisplayDownloadButton dir={dir} />
                     {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
                         <DisplayIcon icon={<ZipIcon className="h-12 w-12" />} />
                         :
                         <DisplayIcon icon={<FileIcon className="h-12 w-12" />} />
                     }
                     <DisplayBasename dir={dir} />
-
                 </div>
             </HoverCardTrigger>
-            <HoverCardContent className="w-80 bg-white dark:bg-black">
+            <HoverCardContent className={backgroundClass("w-full")}>
                 <div className="flex justify-between space-x-4">
                     <div className="space-y-1">
-                        <h4 className="text-sm font-semibold break-all">{dir.basename}</h4>
-                        <div className="flex items-center pt-2">
-                            <span className="text-xs text-muted-foreground break-all">
-                                <DisplaySize dir={dir} />
-                            </span>
-                        </div>
+                        {dir.basename}
+                        <span className={muteTextClass("pt-2")}>
+                            <DisplaySize dir={dir} />
+                        </span>
                     </div>
                 </div>
             </HoverCardContent>

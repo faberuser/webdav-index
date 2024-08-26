@@ -38,7 +38,8 @@ import {
     DisplayImage,
     DisplayTextFile,
     DisplayFile,
-    DisplayText
+    DisplayText,
+    DisplayVideo,
 } from "@/components/dirItems"
 
 const cache: any = {}
@@ -239,22 +240,38 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
     )
 }
 
+function getFileExtension(filename: string) {
+    const dotIndex = filename.lastIndexOf('.');
+    if (dotIndex === -1) return '';
+    return filename.slice(dotIndex);
+}
+
 function AccessDir({ items, onChange }: any) {
+    const fileExtensionToComponent: any = {
+        '.png': DisplayImage,
+        '.jpg': DisplayImage,
+        '.jpeg': DisplayImage,
+        '.gif': DisplayImage,
+        '.avif': DisplayImage,
+        '.webp': DisplayImage,
+
+        '.mp4': DisplayVideo,
+
+        '.md': DisplayTextFile,
+        '.txt': DisplayTextFile,
+        '.json': DisplayTextFile,
+        '.ini': DisplayTextFile,
+        '.log': DisplayTextFile,
+    }
+
     return (
-        items.map((dir: any) => (
-            dir.type === 'directory' ?
-                <DislayDir key={dir.etag} dir={dir} onChange={onChange} />
-                :
-                dir.basename.endsWith('.png') || dir.basename.endsWith('.jpg') || dir.basename.endsWith('.jpeg') ||
-                    dir.basename.endsWith('.gif') || dir.basename.endsWith('.avif') || dir.basename.endsWith('.webp') ?
-                    <DisplayImage key={dir.etag} dir={dir} />
-                    :
-                    dir.basename.endsWith('.md') || dir.basename.endsWith('.txt') || dir.basename.endsWith('.json') ||
-                        dir.basename.endsWith('.ini') || dir.basename.endsWith('.log') ?
-                        <DisplayTextFile key={dir.etag} dir={dir} />
-                        :
-                        <DisplayFile key={dir.etag} dir={dir} />
-        ))
+        items.map((dir: any) => {
+            const Component = dir.type === 'directory'
+                ? DislayDir
+                : fileExtensionToComponent[getFileExtension(dir.basename)] || DisplayFile
+
+            return <Component key={dir.etag} dir={dir} onChange={onChange} />
+        })
     )
 }
 
