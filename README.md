@@ -45,9 +45,9 @@ npm run start
 
 ## Screenshots
 
-![Screenshot-1](https://media.discordapp.net/attachments/1274733447184777236/1274733639854194729/image.png?ex=66c353b7&is=66c20237&hm=36b06ead97ab717329c71ddcf3cf58e6d6763cf7aab205f393b4974d3726349d)
+![Screenshot-1](https://nextcloud.k-clowd.top/apps/files_sharing/publicpreview/ZJycLzxFLcd3TdM?file=/&fileId=783141&x=1366&y=768&a=true&etag=2d8116cd84998288352f60852b6feffe)
 
-![Screenshot-2](https://media.discordapp.net/attachments/1274733447184777236/1274733874672308255/image.png?ex=66c353ef&is=66c2026f&hm=52e953855c32323fa08106c37fa209ee7b9175aa84f4d2dc1184faebf471a447)
+![Screenshot-2](https://nextcloud.k-clowd.top/apps/files_sharing/publicpreview/DMWGjnByziWs24K?file=/&fileId=783140&x=1366&y=768&a=true&etag=a78353e4fea824724c102e59b6dc92a2)
 
 ### Todo
 
