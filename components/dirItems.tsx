@@ -82,7 +82,7 @@ export function DislayDir({ dir, onChange }: any) {
                         className="aspect-[1/1] w-full h-full group relative rounded-md p-4 shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500">
 
                         {isLoading ?
-                            <DisplayIcon icon={<FolderIcon className="h-12 w-12" />} />
+                            <DisplayIcon icon={<LoadingIcon className="h-12 w-12" />} />
                             :
                             preview &&
                             <DisplayIcon icon={
