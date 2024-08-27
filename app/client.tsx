@@ -84,6 +84,7 @@ export default function Client({ title }: any) {
     }, [currentPath])
 
     function setNewPath(_path: any) {
+        console.log(fetchQueue)
         for (const [controller, isRunning] of fetchQueue) {
             if (!isRunning) {
                 controller.abort()
