@@ -1,7 +1,7 @@
 "use client"
 
 import path from "path"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import {
     DownloadIcon,
@@ -145,19 +145,35 @@ async function downloadFile(filepath: string) {
 }
 
 
-export function DislayDir({ dir, onChange }: any) {
+async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, abortController: any) {
+    abortController.current.abort()
+    abortController.current = new AbortController()
+
+    try {
+        const response = await fetch(url, {
+            signal: abortController.current.signal
+        })
+        const blob = await response.blob()
+        const objectURL = URL.createObjectURL(blob)
+        cache[filename] = objectURL
+        setFunc(objectURL)
+    } catch (error: any) {
+        if (error.name === 'AbortError') { } else { throw error }
+    }
+    return new Promise<void>(resolve => resolve());
+}
+
+
+export function DisplayDir({ dir, onChange }: any) {
     const [preview, setPreview] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+
+    const abortController = useRef(new AbortController())
 
     const fetchContents = async () => {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.hasThumbnail)
-        const response = await fetch(`/api/preview?filename=${filename}`)
-        const blob = await response.blob()
-        const objectURL = URL.createObjectURL(blob)
-        previewCache[dir.hasThumbnail] = objectURL
-        setPreview(objectURL)
-        setIsLoading(false)
+        await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.hasThumbnail, abortController)
     }
 
     useEffect(() => {
@@ -168,7 +184,15 @@ export function DislayDir({ dir, onChange }: any) {
                 fetchContents()
             }
         }
-    }, [dir.hasThumbnail])
+
+        if (preview) {
+            setIsLoading(false);
+        }
+
+        return () => {
+            abortController.current.abort();
+        }
+    }, [dir.hasThumbnail, preview])
 
     return (
         dir.hasThumbnail != null ?
@@ -234,24 +258,17 @@ export function DisplayImage({ dir }: any) {
     const [isLoading, setIsLoading] = useState(false)
     const [isImageLoading, setIsImageLoading] = useState(true)
 
+    const abortController = useRef(new AbortController())
+
     const fetchContents = async (image: boolean = false) => {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.filename)
         if (image) {
-            const response = await fetch(`/api/image?filename=${filename}`)
-            const blob = await response.blob()
-            const objectURL = URL.createObjectURL(blob)
-            imageCache[dir.filename] = objectURL
-            setImage(objectURL)
-            setIsImageLoading(false)
+            await fetchAndSet(`/api/image?filename=${filename}`, imageCache, setImage, dir.filename, abortController)
+            setIsImageLoading(false);
         } else {
-            const response = await fetch(`/api/preview?filename=${filename}`)
-            const blob = await response.blob()
-            const objectURL = URL.createObjectURL(blob)
-            previewCache[dir.filename] = objectURL
-            setPreview(objectURL)
+            await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.filename, abortController)
         }
-        setIsLoading(false)
     }
 
     useEffect(() => {
@@ -260,7 +277,15 @@ export function DisplayImage({ dir }: any) {
         } else {
             fetchContents()
         }
-    }, [dir.filename])
+
+        if (preview) {
+            setIsLoading(false);
+        }
+
+        return () => {
+            abortController.current.abort();
+        }
+    }, [dir.filename, preview])
 
     function getImage(filename: any) {
         if (imageCache[filename]) {
@@ -293,9 +318,12 @@ export function DisplayImage({ dir }: any) {
             </DialogTrigger>
             <DialogContent className={backgroundClass("max-w-min max-h-screen")}>
                 {isImageLoading ?
-                    <span className="p-4">
-                        <LoadingIconLarge />
-                    </span>
+                    <DialogHeader>
+                        <DialogTitle></DialogTitle>
+                        <DialogDescription className="p-2">
+                            <LoadingIconLarge />
+                        </DialogDescription>
+                    </DialogHeader>
                     : image && <DialogHeader>
                         <DialogTitle className={nameTitleClass("pr-5")}>
                             {dir.basename}
@@ -303,14 +331,15 @@ export function DisplayImage({ dir }: any) {
                                 <DisplaySize dir={dir} />
                             </span>
                         </DialogTitle>
-                        <DialogDescription className="flex items-center justify-center"><Image
-                            src={image}
-                            alt={dir.basename}
-                            width={0}
-                            height={0}
-                            sizes="100vw"
-                            className="max-h-[90vh] max-w-[90vw] w-auto h-full"
-                        />
+                        <DialogDescription className="flex items-center justify-center">
+                            <Image
+                                src={image}
+                                alt={dir.basename}
+                                width={0}
+                                height={0}
+                                sizes="100vw"
+                                className="max-h-[90vh] max-w-[90vw] w-auto h-full"
+                            />
                         </DialogDescription>
                     </DialogHeader>
                 }

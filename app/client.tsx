@@ -34,7 +34,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 import {
-    DislayDir,
+    DisplayDir,
     DisplayImage,
     DisplayTextFile,
     DisplayFile,
@@ -54,6 +54,7 @@ export default function Client({ title }: any) {
     const fetchContents = async () => {
         setHasMD("")
         setIsLoading(true)
+
         const response = await fetch(`/api/listContents?dir=${encodeURIComponent(currentPath)}`)
         const json = await response.json()
         cache[currentPath] = json
@@ -267,7 +268,7 @@ function AccessDir({ items, onChange }: any) {
     return (
         items.map((dir: any) => {
             const Component = dir.type === 'directory'
-                ? DislayDir
+                ? DisplayDir
                 : fileExtensionToComponent[getFileExtension(dir.basename)] || DisplayFile
 
             return <Component key={dir.etag} dir={dir} onChange={onChange} />

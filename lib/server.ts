@@ -122,10 +122,14 @@ export async function getPreview(filename: string) {
     const metadata = await image.metadata()
 
     if (metadata.width && metadata.height) {
-        if (metadata.width > metadata.height) {
-            return await image.resize(256, null).toBuffer()
+        if (metadata.width > 256 || metadata.height > 256) {
+            if (metadata.width > metadata.height) {
+                return await image.resize(256, null).toBuffer()
+            } else {
+                return await image.resize(null, 256).toBuffer()
+            }
         } else {
-            return await image.resize(null, 256).toBuffer()
+            return fileContents
         }
     } else {
         return await image.resize(256, 256).toBuffer()
