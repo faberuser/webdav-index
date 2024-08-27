@@ -159,7 +159,9 @@ async function fetchAndSet(url: string, cache: any, setFunc: any, filename: stri
         cache[filename] = objectURL
         setFunc(objectURL)
     } catch (error: any) {
-        if (error.name === 'AbortError') { } else { throw error }
+        if (error.name === 'AbortError') { }
+        else if (error.name === 'TypeError') { }
+        else { throw error }
     } finally {
         fetchQueue.set(abortController, false)
     }
