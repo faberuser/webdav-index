@@ -147,10 +147,9 @@ async function downloadFile(filepath: string) {
 
 async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, fetchQueue: any) {
     const abortController = new AbortController()
-    fetchQueue.set(abortController, false)
+    fetchQueue.push(abortController)
 
     try {
-        fetchQueue.set(abortController, true)
         const response = await fetch(url, {
             signal: abortController.signal
         })
@@ -159,11 +158,11 @@ async function fetchAndSet(url: string, cache: any, setFunc: any, filename: stri
         cache[filename] = objectURL
         setFunc(objectURL)
     } catch (error: any) {
-        if (error.name === 'AbortError') { }
-        else if (error.name === 'TypeError') { }
-        else { throw error }
+        // if (error.name === 'AbortError') { }
+        // else if (error.name === 'TypeError') { }
+        // else { throw error }
     } finally {
-        fetchQueue.set(abortController, false)
+        fetchQueue = fetchQueue.filter((controller: any) => controller !== abortController)
     }
 }
 
@@ -360,12 +359,13 @@ export function DisplayVideo({ dir }: any) {
                         </span>
                     </DialogTitle>
                     <DialogDescription className="flex items-center justify-center">
-                        <video
-                            src={`/api/video?filename=${dir.filename}`} controls
+                        <video controls autoPlay
+                            src={`/api/video?filename=${dir.filename}`}
                             width={0}
                             height={0}
                             className="max-h-[90vh] max-w-[90vw] w-auto h-full"
                         >
+                            Your browser does not support the video tag.
                         </video>
                     </DialogDescription>
                 </DialogHeader>
@@ -403,17 +403,28 @@ export function DisplayTextFile({ dir }: any) {
 }
 
 
-export function DisplayText({ filename }: any) {
+export function DisplayText({ filename, fetchQueue }: any) {
     const [text, setText] = useState("")
+    const abortController = new AbortController()
 
     const getText = async () => {
-        const response = await fetch(`/api/md?filename=${encodeURIComponent(filename)}`)
-        if (!response.ok) {
-            throw new Error('Failed to download file')
+        fetchQueue.push(abortController)
+
+        try {
+            const response = await fetch(`/api/md?filename=${encodeURIComponent(filename)}`)
+            if (!response.ok) {
+                throw new Error('Failed to download file')
+            }
+            const text = await response.text()
+            setText(text)
+            textCache[filename] = text
+        } catch (error: any) {
+            // if (error.name === 'AbortError') { }
+            // else if (error.name === 'TypeError') { }
+            // else { throw error }
+        } finally {
+            fetchQueue = fetchQueue.filter((controller: any) => controller !== abortController)
         }
-        const text = await response.text()
-        setText(text)
-        textCache[filename] = text
     }
 
     useEffect(() => {

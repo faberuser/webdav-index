@@ -43,7 +43,7 @@ import {
 } from "@/components/dirItems"
 
 const cache: any = {}
-let fetchQueue: any = new Map()
+let fetchQueue: any = []
 
 export default function Client({ title }: any) {
     const [rootDirItems, setRootDirItems] = useState([])
@@ -83,15 +83,10 @@ export default function Client({ title }: any) {
     }, [currentPath])
 
     function setNewPath(_path: any) {
-        console.log(fetchQueue)
-        for (const [controller, isRunning] of fetchQueue) {
-            // if (!isRunning) {
-            //     controller.abort()
-            //     fetchQueue.delete(controller)
-            // }
+        for (const controller of fetchQueue) {
             controller.abort()
-            fetchQueue.delete(controller)
         }
+        fetchQueue = []
         setCurrentPath(_path)
     }
 
@@ -166,7 +161,7 @@ export default function Client({ title }: any) {
                                 {hasMD.split('/').filter((x: string) => x).pop()}
                             </h2>
                             <div className="text-sm whitespace-pre-wrap break-words text-pretty">
-                                <DisplayText filename={hasMD} />
+                                <DisplayText filename={hasMD} fetchQueue={fetchQueue} key={currentPath} />
                             </div>
                         </div>
                     </div>
