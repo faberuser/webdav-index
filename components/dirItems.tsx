@@ -12,6 +12,7 @@ import {
     LoadingIcon,
     TextFileIcon,
     VideoIcon,
+    LoadingIconLarge,
 } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
@@ -46,6 +47,7 @@ import {
 
 
 const previewCache: any = {}
+const imageCache: any = {}
 const textCache: any = {}
 
 const toastTitle = ({ dir }: any) =>
@@ -174,7 +176,7 @@ export function DislayDir({ dir, onChange }: any) {
                 <HoverCardTrigger asChild>
                     <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className={cardClass("")}>
                         {isLoading ?
-                            <DisplayIcon icon={<LoadingIcon className="h-12 w-12" />} />
+                            <DisplayIcon icon={<LoadingIcon />} />
                             :
                             preview &&
                             <DisplayIcon icon={
@@ -228,16 +230,27 @@ export function DislayDir({ dir, onChange }: any) {
 
 export function DisplayImage({ dir }: any) {
     const [preview, setPreview] = useState("")
+    const [image, setImage] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [isImageLoading, setIsImageLoading] = useState(true)
 
-    const fetchContents = async () => {
+    const fetchContents = async (image: boolean = false) => {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.filename)
-        const response = await fetch(`/api/preview?filename=${filename}`)
-        const blob = await response.blob()
-        const objectURL = URL.createObjectURL(blob)
-        previewCache[dir.filename] = objectURL
-        setPreview(objectURL)
+        if (image) {
+            const response = await fetch(`/api/image?filename=${filename}`)
+            const blob = await response.blob()
+            const objectURL = URL.createObjectURL(blob)
+            imageCache[dir.filename] = objectURL
+            setImage(objectURL)
+            setIsImageLoading(false)
+        } else {
+            const response = await fetch(`/api/preview?filename=${filename}`)
+            const blob = await response.blob()
+            const objectURL = URL.createObjectURL(blob)
+            previewCache[dir.filename] = objectURL
+            setPreview(objectURL)
+        }
         setIsLoading(false)
     }
 
@@ -249,14 +262,22 @@ export function DisplayImage({ dir }: any) {
         }
     }, [dir.filename])
 
+    function getImage(filename: any) {
+        if (imageCache[filename]) {
+            return imageCache[filename]
+        } else {
+            fetchContents(true)
+        }
+    }
+
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <div className={cardClass("p-0")}>
+                <div style={{ cursor: 'pointer' }} className={cardClass("p-0")} onClick={() => getImage(dir.filename)}>
                     <div className="flex h-full w-full items-center justify-center text-gray-500 dark:text-gray-400">
                         <DisplayDownloadButton dir={dir} />
                         {isLoading ?
-                            <LoadingIcon className="h-24 w-24" />
+                            <LoadingIcon />
                             :
                             preview && <Image
                                 src={preview}
@@ -271,28 +292,28 @@ export function DisplayImage({ dir }: any) {
                 </div>
             </DialogTrigger>
             <DialogContent className={backgroundClass("max-w-min max-h-screen")}>
-                <DialogHeader>
-                    <DialogTitle className={nameTitleClass("pr-5")}>
-                        {dir.basename}
-                        <span className={muteTextClass("")}>
-                            <DisplaySize dir={dir} />
-                        </span>
-                    </DialogTitle>
-                    <DialogDescription className="flex items-center justify-center">
-                        {isLoading ?
-                            <ImageIcon className="h-64 w-64" />
-                            :
-                            preview && <Image
-                                src={preview}
-                                alt={dir.basename}
-                                width={0}
-                                height={0}
-                                sizes="100vw"
-                                className="max-h-[90vh] max-w-[90vw] w-auto h-full"
-                            />
-                        }
-                    </DialogDescription>
-                </DialogHeader>
+                {isImageLoading ?
+                    <span className="p-4">
+                        <LoadingIconLarge />
+                    </span>
+                    : image && <DialogHeader>
+                        <DialogTitle className={nameTitleClass("pr-5")}>
+                            {dir.basename}
+                            <span className={muteTextClass("")}>
+                                <DisplaySize dir={dir} />
+                            </span>
+                        </DialogTitle>
+                        <DialogDescription className="flex items-center justify-center"><Image
+                            src={image}
+                            alt={dir.basename}
+                            width={0}
+                            height={0}
+                            sizes="100vw"
+                            className="max-h-[90vh] max-w-[90vw] w-auto h-full"
+                        />
+                        </DialogDescription>
+                    </DialogHeader>
+                }
             </DialogContent>
         </Dialog >
     )

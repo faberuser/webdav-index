@@ -214,7 +214,7 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
     return (
         <div>
             <div style={{ cursor: 'pointer' }} onClick={handleExpand} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">
-                {isLoading && <LoadingIcon className="h-4 w-4" />}
+                {isLoading && <LoadingIcon />}
                 {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
                 {/* {currentPath.split('/').filter((x: string) => x).pop() === dir ? <span className="font-semibold text-gray-200 dark:text-gray-800">{dir}</span> : dir} */}
                 <TooltipProvider>

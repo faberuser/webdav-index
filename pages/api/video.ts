@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import * as utils from '@/lib/utils'
+import * as utils from '@/lib/server'
+
 
 export const config = {
     api: {
@@ -7,6 +8,7 @@ export const config = {
         responseLimit: false,
     },
 }
+
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { filename } = req.query

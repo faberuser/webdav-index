@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import * as utils from '@/lib/utils'
+import * as utils from '@/lib/server'
+
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { dir, deep } = req.query
