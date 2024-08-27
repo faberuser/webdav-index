@@ -43,7 +43,7 @@ import {
 } from "@/components/dirItems"
 
 const cache: any = {}
-let fetchQueue: any = []
+let fetchQueue: any = new Map()
 
 export default function Client({ title }: any) {
     const [rootDirItems, setRootDirItems] = useState([])
@@ -84,10 +84,12 @@ export default function Client({ title }: any) {
     }, [currentPath])
 
     function setNewPath(_path: any) {
-        for (const controller of fetchQueue) {
-            controller.abort()
+        for (const [controller, isRunning] of fetchQueue) {
+            if (!isRunning) {
+                controller.abort();
+                fetchQueue.delete(controller);
+            }
         }
-        fetchQueue = []
         setCurrentPath(_path)
     }
 
