@@ -147,9 +147,10 @@ async function downloadFile(filepath: string) {
 
 async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, fetchQueue: any) {
     const abortController = new AbortController()
-    fetchQueue.set(abortController, true)
+    fetchQueue.set(abortController, false)
 
     try {
+        fetchQueue.set(abortController, true)
         const response = await fetch(url, {
             signal: abortController.signal
         })

@@ -86,8 +86,8 @@ export default function Client({ title }: any) {
     function setNewPath(_path: any) {
         for (const [controller, isRunning] of fetchQueue) {
             if (!isRunning) {
-                controller.abort();
-                fetchQueue.delete(controller);
+                controller.abort()
+                fetchQueue.delete(controller)
             }
         }
         setCurrentPath(_path)
