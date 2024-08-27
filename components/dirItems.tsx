@@ -158,9 +158,9 @@ async function fetchAndSet(url: string, cache: any, setFunc: any, filename: stri
         cache[filename] = objectURL
         setFunc(objectURL)
     } catch (error: any) {
-        // if (error.name === 'AbortError') { }
-        // else if (error.name === 'TypeError') { }
-        // else { throw error }
+        if (error.name === 'AbortError') { }
+        else if (error.name === 'TypeError') { }
+        else { throw error }
     } finally {
         fetchQueue = fetchQueue.filter((controller: any) => controller !== abortController)
     }
@@ -419,9 +419,9 @@ export function DisplayText({ filename, fetchQueue }: any) {
             setText(text)
             textCache[filename] = text
         } catch (error: any) {
-            // if (error.name === 'AbortError') { }
-            // else if (error.name === 'TypeError') { }
-            // else { throw error }
+            if (error.name === 'AbortError') { }
+            else if (error.name === 'TypeError') { }
+            else { throw error }
         } finally {
             fetchQueue = fetchQueue.filter((controller: any) => controller !== abortController)
         }
