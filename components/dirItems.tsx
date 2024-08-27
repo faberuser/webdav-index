@@ -145,31 +145,21 @@ async function downloadFile(filepath: string) {
 }
 
 
-async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, abortController: any, isFetching: any, setIsFetching: any) {
-    if (isFetching) {
-        return; // If a fetch request is in progress, don't start a new one
-    }
+let fetchQueue = Promise.resolve();
 
-    setIsFetching(true)
-
-    if (abortController.current) {
-        abortController.current.abort();
-    }
-
-    abortController.current = new AbortController()
+async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, abortController: any) {
+    abortController.current = new AbortController();
 
     try {
         const response = await fetch(url, {
             signal: abortController.current.signal
-        })
-        const blob = await response.blob()
-        const objectURL = URL.createObjectURL(blob)
-        cache[filename] = objectURL
-        setFunc(objectURL)
+        });
+        const blob = await response.blob();
+        const objectURL = URL.createObjectURL(blob);
+        cache[filename] = objectURL;
+        setFunc(objectURL);
     } catch (error: any) {
-        if (error.name === 'AbortError') { } else { throw error }
-    } finally {
-        setIsFetching(false)
+        if (error.name === 'AbortError') { } else { throw error; }
     }
 }
 
@@ -179,12 +169,11 @@ export function DisplayDir({ dir, onChange }: any) {
     const [isLoading, setIsLoading] = useState(false)
 
     const abortController = useRef(new AbortController())
-    const [isFetching, setIsFetching] = useState(false);
 
     const fetchContents = async () => {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.hasThumbnail)
-        await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.hasThumbnail, abortController, isFetching, setIsFetching)
+        fetchQueue = fetchQueue.then(() => fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.hasThumbnail, abortController));
     }
 
     useEffect(() => {
@@ -270,16 +259,15 @@ export function DisplayImage({ dir }: any) {
     const [isImageLoading, setIsImageLoading] = useState(true)
 
     const abortController = useRef(new AbortController())
-    const [isFetching, setIsFetching] = useState(false);
 
     const fetchContents = async (image: boolean = false) => {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.filename)
         if (image) {
-            await fetchAndSet(`/api/image?filename=${filename}`, imageCache, setImage, dir.filename, abortController, isImageLoading, setIsImageLoading)
+            await fetchAndSet(`/api/image?filename=${filename}`, imageCache, setImage, dir.filename, abortController)
             setIsImageLoading(false);
         } else {
-            await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.filename, abortController, isFetching, setIsFetching)
+            await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.filename, abortController)
         }
     }
 
