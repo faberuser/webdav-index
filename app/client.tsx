@@ -43,6 +43,7 @@ import {
 } from "@/components/dirItems"
 
 const cache: any = {}
+let fetchQueue: any = []
 
 export default function Client({ title }: any) {
     const [rootDirItems, setRootDirItems] = useState([])
@@ -271,7 +272,7 @@ function AccessDir({ items, onChange }: any) {
                 ? DisplayDir
                 : fileExtensionToComponent[getFileExtension(dir.basename)] || DisplayFile
 
-            return <Component key={dir.etag} dir={dir} onChange={onChange} />
+            return <Component key={dir.etag} dir={dir} onChange={onChange} fetchQueue={fetchQueue} />
         })
     )
 }

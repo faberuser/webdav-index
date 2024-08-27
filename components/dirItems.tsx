@@ -145,35 +145,35 @@ async function downloadFile(filepath: string) {
 }
 
 
-let fetchQueue = Promise.resolve()
-
-async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, abortController: any) {
-    abortController.current = new AbortController()
+async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, fetchQueue: any) {
+    const abortController = new AbortController();
+    fetchQueue.push(abortController); // Add the AbortController to the queue
 
     try {
         const response = await fetch(url, {
-            signal: abortController.current.signal
-        })
-        const blob = await response.blob()
-        const objectURL = URL.createObjectURL(blob)
-        cache[filename] = objectURL
-        setFunc(objectURL)
+            signal: abortController.signal
+        });
+        const blob = await response.blob();
+        const objectURL = URL.createObjectURL(blob);
+        cache[filename] = objectURL;
+        setFunc(objectURL);
     } catch (error: any) {
-        if (error.name === 'AbortError') { } else { throw error }
+        if (error.name === 'AbortError') { } else { throw error; }
+    } finally {
+        // Remove the AbortController from the queue when the fetch request has completed
+        fetchQueue = fetchQueue.filter((controller: any) => controller !== abortController);
     }
 }
 
 
-export function DisplayDir({ dir, onChange }: any) {
+export function DisplayDir({ dir, onChange, fetchQueue }: any) {
     const [preview, setPreview] = useState("")
     const [isLoading, setIsLoading] = useState(false)
-
-    const abortController = useRef(new AbortController())
 
     const fetchContents = async () => {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.hasThumbnail)
-        fetchQueue = fetchQueue.then(() => fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.hasThumbnail, abortController))
+        await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.hasThumbnail, fetchQueue)
     }
 
     useEffect(() => {
@@ -184,13 +184,8 @@ export function DisplayDir({ dir, onChange }: any) {
                 fetchContents()
             }
         }
-
         if (preview) {
             setIsLoading(false)
-        }
-
-        return () => {
-            abortController.current.abort()
         }
     }, [dir.hasThumbnail, preview])
 
@@ -252,21 +247,19 @@ export function DisplayDir({ dir, onChange }: any) {
 }
 
 
-export function DisplayImage({ dir }: any) {
+export function DisplayImage({ dir, fetchQueue }: any) {
     const [preview, setPreview] = useState("")
     const [image, setImage] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [isImageLoading, setIsImageLoading] = useState(true)
 
-    const abortController = useRef(new AbortController())
-
     const fetchContents = async (image: boolean = false) => {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.filename)
         if (image) {
-            fetchQueue = fetchQueue.then(() => fetchAndSet(`/api/image?filename=${filename}`, imageCache, setImage, dir.filename, abortController))
+            await fetchAndSet(`/api/image?filename=${filename}`, imageCache, setImage, dir.filename, fetchQueue)
         } else {
-            fetchQueue = fetchQueue.then(() => fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.filename, abortController))
+            await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.filename, fetchQueue)
         }
     }
 
@@ -276,19 +269,13 @@ export function DisplayImage({ dir }: any) {
         } else {
             fetchContents()
         }
-
         if (preview) {
             setIsLoading(false)
         }
-
         if (image) {
             setIsImageLoading(false)
         }
-
-        return () => {
-            abortController.current.abort()
-        }
-    }, [dir.filename, preview])
+    }, [dir.filename, preview, image])
 
     function getImage(filename: any) {
         if (imageCache[filename]) {
