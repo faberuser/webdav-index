@@ -59,7 +59,7 @@ export default function Client({ title }: any) {
         const json = await response.json()
         cache[currentPath] = json
         setDirItems(json)
-        const mdFile = json.find((item: any) => item.basename.endsWith('.md'));
+        const mdFile = json.find((item: any) => item.basename.endsWith('.md'))
         if (mdFile) {
             setHasMD(mdFile.filename)
         }
@@ -73,7 +73,7 @@ export default function Client({ title }: any) {
         if (cache[currentPath]) {
             setHasMD("")
             setDirItems(cache[currentPath])
-            const mdFile = cache[currentPath].find((item: any) => item.basename.endsWith('.md'));
+            const mdFile = cache[currentPath].find((item: any) => item.basename.endsWith('.md'))
             if (mdFile) {
                 setHasMD(mdFile.filename)
             }
@@ -242,9 +242,9 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
 }
 
 function getFileExtension(filename: string) {
-    const dotIndex = filename.lastIndexOf('.');
-    if (dotIndex === -1) return '';
-    return filename.slice(dotIndex);
+    const dotIndex = filename.lastIndexOf('.')
+    if (dotIndex === -1) return ''
+    return filename.slice(dotIndex)
 }
 
 function AccessDir({ items, onChange }: any) {

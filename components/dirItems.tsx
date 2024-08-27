@@ -145,21 +145,21 @@ async function downloadFile(filepath: string) {
 }
 
 
-let fetchQueue = Promise.resolve();
+let fetchQueue = Promise.resolve()
 
 async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, abortController: any) {
-    abortController.current = new AbortController();
+    abortController.current = new AbortController()
 
     try {
         const response = await fetch(url, {
             signal: abortController.current.signal
-        });
-        const blob = await response.blob();
-        const objectURL = URL.createObjectURL(blob);
-        cache[filename] = objectURL;
-        setFunc(objectURL);
+        })
+        const blob = await response.blob()
+        const objectURL = URL.createObjectURL(blob)
+        cache[filename] = objectURL
+        setFunc(objectURL)
     } catch (error: any) {
-        if (error.name === 'AbortError') { } else { throw error; }
+        if (error.name === 'AbortError') { } else { throw error }
     }
 }
 
@@ -173,7 +173,7 @@ export function DisplayDir({ dir, onChange }: any) {
     const fetchContents = async () => {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.hasThumbnail)
-        fetchQueue = fetchQueue.then(() => fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.hasThumbnail, abortController));
+        fetchQueue = fetchQueue.then(() => fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.hasThumbnail, abortController))
     }
 
     useEffect(() => {
@@ -186,11 +186,11 @@ export function DisplayDir({ dir, onChange }: any) {
         }
 
         if (preview) {
-            setIsLoading(false);
+            setIsLoading(false)
         }
 
         return () => {
-            abortController.current.abort();
+            abortController.current.abort()
         }
     }, [dir.hasThumbnail, preview])
 
@@ -264,10 +264,9 @@ export function DisplayImage({ dir }: any) {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.filename)
         if (image) {
-            await fetchAndSet(`/api/image?filename=${filename}`, imageCache, setImage, dir.filename, abortController)
-            setIsImageLoading(false);
+            fetchQueue = fetchQueue.then(() => fetchAndSet(`/api/image?filename=${filename}`, imageCache, setImage, dir.filename, abortController))
         } else {
-            await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.filename, abortController)
+            fetchQueue = fetchQueue.then(() => fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.filename, abortController))
         }
     }
 
@@ -279,11 +278,15 @@ export function DisplayImage({ dir }: any) {
         }
 
         if (preview) {
-            setIsLoading(false);
+            setIsLoading(false)
+        }
+
+        if (image) {
+            setIsImageLoading(false)
         }
 
         return () => {
-            abortController.current.abort();
+            abortController.current.abort()
         }
     }, [dir.filename, preview])
 
