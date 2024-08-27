@@ -160,7 +160,6 @@ async function fetchAndSet(url: string, cache: any, setFunc: any, filename: stri
     } catch (error: any) {
         if (error.name === 'AbortError') { } else { throw error }
     }
-    return new Promise<void>(resolve => resolve());
 }
 
 
