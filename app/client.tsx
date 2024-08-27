@@ -55,7 +55,6 @@ export default function Client({ title }: any) {
     const fetchContents = async () => {
         setHasMD("")
         setIsLoading(true)
-
         const response = await fetch(`/api/listContents?dir=${encodeURIComponent(currentPath)}`)
         const json = await response.json()
         cache[currentPath] = json
@@ -86,10 +85,12 @@ export default function Client({ title }: any) {
     function setNewPath(_path: any) {
         console.log(fetchQueue)
         for (const [controller, isRunning] of fetchQueue) {
-            if (!isRunning) {
-                controller.abort()
-                fetchQueue.delete(controller)
-            }
+            // if (!isRunning) {
+            //     controller.abort()
+            //     fetchQueue.delete(controller)
+            // }
+            controller.abort()
+            fetchQueue.delete(controller)
         }
         setCurrentPath(_path)
     }
