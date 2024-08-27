@@ -145,8 +145,17 @@ async function downloadFile(filepath: string) {
 }
 
 
-async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, abortController: any) {
-    abortController.current.abort()
+async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, abortController: any, isFetching: any, setIsFetching: any) {
+    if (isFetching) {
+        return; // If a fetch request is in progress, don't start a new one
+    }
+
+    setIsFetching(true)
+
+    if (abortController.current) {
+        abortController.current.abort();
+    }
+
     abortController.current = new AbortController()
 
     try {
@@ -159,6 +168,8 @@ async function fetchAndSet(url: string, cache: any, setFunc: any, filename: stri
         setFunc(objectURL)
     } catch (error: any) {
         if (error.name === 'AbortError') { } else { throw error }
+    } finally {
+        setIsFetching(false)
     }
 }
 
@@ -168,11 +179,12 @@ export function DisplayDir({ dir, onChange }: any) {
     const [isLoading, setIsLoading] = useState(false)
 
     const abortController = useRef(new AbortController())
+    const [isFetching, setIsFetching] = useState(false);
 
     const fetchContents = async () => {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.hasThumbnail)
-        await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.hasThumbnail, abortController)
+        await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.hasThumbnail, abortController, isFetching, setIsFetching)
     }
 
     useEffect(() => {
@@ -258,15 +270,16 @@ export function DisplayImage({ dir }: any) {
     const [isImageLoading, setIsImageLoading] = useState(true)
 
     const abortController = useRef(new AbortController())
+    const [isFetching, setIsFetching] = useState(false);
 
     const fetchContents = async (image: boolean = false) => {
         setIsLoading(true)
         const filename = encodeURIComponent(dir.filename)
         if (image) {
-            await fetchAndSet(`/api/image?filename=${filename}`, imageCache, setImage, dir.filename, abortController)
+            await fetchAndSet(`/api/image?filename=${filename}`, imageCache, setImage, dir.filename, abortController, isImageLoading, setIsImageLoading)
             setIsImageLoading(false);
         } else {
-            await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.filename, abortController)
+            await fetchAndSet(`/api/preview?filename=${filename}`, previewCache, setPreview, dir.filename, abortController, isFetching, setIsFetching)
         }
     }
 
