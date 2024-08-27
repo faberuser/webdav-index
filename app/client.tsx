@@ -84,6 +84,10 @@ export default function Client({ title }: any) {
     }, [currentPath])
 
     function setNewPath(_path: any) {
+        for (const controller of fetchQueue) {
+            controller.abort()
+        }
+        fetchQueue = []
         setCurrentPath(_path)
     }
 

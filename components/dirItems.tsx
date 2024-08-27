@@ -146,22 +146,21 @@ async function downloadFile(filepath: string) {
 
 
 async function fetchAndSet(url: string, cache: any, setFunc: any, filename: string, fetchQueue: any) {
-    const abortController = new AbortController();
-    fetchQueue.push(abortController); // Add the AbortController to the queue
+    const abortController = new AbortController()
+    fetchQueue.push(abortController)
 
     try {
         const response = await fetch(url, {
             signal: abortController.signal
-        });
-        const blob = await response.blob();
-        const objectURL = URL.createObjectURL(blob);
-        cache[filename] = objectURL;
-        setFunc(objectURL);
+        })
+        const blob = await response.blob()
+        const objectURL = URL.createObjectURL(blob)
+        cache[filename] = objectURL
+        setFunc(objectURL)
     } catch (error: any) {
-        if (error.name === 'AbortError') { } else { throw error; }
+        if (error.name === 'AbortError') { } else { throw error }
     } finally {
-        // Remove the AbortController from the queue when the fetch request has completed
-        fetchQueue = fetchQueue.filter((controller: any) => controller !== abortController);
+        fetchQueue = fetchQueue.filter((controller: any) => controller !== abortController)
     }
 }
 
