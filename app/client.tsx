@@ -1,9 +1,11 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import RenderIfVisible from '@/components/RenderIfVisible'
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/toggleMode"
-import { useState, useEffect } from "react"
 import { ChevronDown, Slash } from "lucide-react"
 import {
     FolderIcon,
@@ -42,8 +44,10 @@ import {
     DisplayVideo,
 } from "@/components/dirItems"
 
+
 const cache: any = {}
 let fetchQueue: any = []
+
 
 export default function Client({ title }: any) {
     const [rootDirItems, setRootDirItems] = useState([])
@@ -183,6 +187,7 @@ export default function Client({ title }: any) {
     )
 }
 
+
 function ListDirs({ dir, path, currentPath = "", onChange }: any) {
     const [isExpanded, setIsExpanded] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -245,11 +250,13 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
     )
 }
 
+
 function getFileExtension(filename: string) {
     const dotIndex = filename.lastIndexOf('.')
     if (dotIndex === -1) return ''
     return filename.slice(dotIndex)
 }
+
 
 function AccessDir({ items, onChange }: any) {
     const fileExtensionToComponent: any = {
@@ -275,10 +282,15 @@ function AccessDir({ items, onChange }: any) {
                 ? DisplayDir
                 : fileExtensionToComponent[getFileExtension(dir.basename)] || DisplayFile
 
-            return <Component key={dir.etag} dir={dir} onChange={onChange} fetchQueue={fetchQueue} />
+            return (
+                <RenderIfVisible key={dir.etag} stayRendered={true}>
+                    <Component key={dir.etag} dir={dir} onChange={onChange} fetchQueue={fetchQueue} />
+                </RenderIfVisible>
+            )
         })
     )
 }
+
 
 function UpdateBreadcrumb({ path = "", onChange }: any) {
     const pathnames = path.split('/').filter((x: string) => x)

@@ -1,7 +1,8 @@
 "use client"
 
 import path from "path"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
+
 import Image from "next/image"
 import {
     DownloadIcon,
@@ -193,7 +194,7 @@ export function DisplayDir({ dir, onChange, fetchQueue }: any) {
     return (
         dir.hasThumbnail != null ?
             <HoverCard>
-                <HoverCardTrigger asChild>
+                <HoverCardTrigger asChild className="h-full w-full">
                     <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className={cardClass("")}>
                         {isLoading ?
                             <DisplayIcon icon={<LoadingIcon />} />
@@ -233,7 +234,7 @@ export function DisplayDir({ dir, onChange, fetchQueue }: any) {
             :
             <TooltipProvider>
                 <Tooltip>
-                    <TooltipTrigger>
+                    <TooltipTrigger asChild className="h-full w-full">
                         <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className={cardClass("")}>
                             <DisplayIcon icon={<FolderIcon className="h-12 w-12" />} />
                             <DisplayBasename dir={dir} />
@@ -288,7 +289,7 @@ export function DisplayImage({ dir, fetchQueue }: any) {
 
     return (
         <Dialog>
-            <DialogTrigger asChild>
+            <DialogTrigger asChild className="h-full w-full">
                 <div style={{ cursor: 'pointer' }} className={cardClass("p-0")} onClick={() => getImage(dir.filename)}>
                     <div className="flex h-full w-full items-center justify-center text-gray-500 dark:text-gray-400">
                         <DisplayDownloadButton dir={dir} />
@@ -343,7 +344,7 @@ export function DisplayImage({ dir, fetchQueue }: any) {
 export function DisplayVideo({ dir }: any) {
     return (
         <Dialog>
-            <DialogTrigger asChild>
+            <DialogTrigger asChild className="h-full w-full">
                 <div style={{ cursor: 'pointer' }} className={cardClass("")}>
                     <DisplayDownloadButton dir={dir} />
                     <DisplayIcon icon={<VideoIcon className="h-12 w-12" />} />
@@ -378,7 +379,7 @@ export function DisplayVideo({ dir }: any) {
 export function DisplayTextFile({ dir }: any) {
     return (
         <Sheet>
-            <SheetTrigger asChild>
+            <SheetTrigger asChild className="h-full w-full">
                 <div style={{ cursor: 'pointer' }} className={cardClass("")}>
                     <DisplayDownloadButton dir={dir} />
                     <DisplayIcon icon={<TextFileIcon className="h-12 w-12" />} />
@@ -442,7 +443,7 @@ export function DisplayText({ filename, fetchQueue }: any) {
 export function DisplayFile({ dir }: any) {
     return (
         <HoverCard>
-            <HoverCardTrigger asChild>
+            <HoverCardTrigger asChild className="h-full w-full">
                 <div className={cardClass("")}>
                     <DisplayDownloadButton dir={dir} />
                     {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
