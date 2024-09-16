@@ -49,10 +49,10 @@ const cache: any = {}
 let fetchQueue: any = []
 
 
-export default function Client({ title, initialPath }: any) {
+export default function Client({ title }: any) {
     const [rootDirItems, setRootDirItems] = useState([])
     const [dirItems, setDirItems] = useState([])
-    const [currentPath, setCurrentPath] = useState(initialPath)
+    const [currentPath, setCurrentPath] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [hasMD, setHasMD] = useState("")
 
@@ -80,32 +80,28 @@ export default function Client({ title, initialPath }: any) {
     }
 
     useEffect(() => {
-        const initialPath = window.location.pathname === '/' ? '' : window.location.pathname;
-        setCurrentPath(initialPath);
-    }, []);
-
-    useEffect(() => {
-        function handlePopState(event: PopStateEvent) {
-            setCurrentPath(window.location.pathname === '/' ? '' : window.location.pathname);
-        }
-        window.addEventListener('popstate', handlePopState);
-        return () => {
-            window.removeEventListener('popstate', handlePopState);
-        };
-    }, []);
-
-    useEffect(() => {
         if (cache[currentPath]) {
-            setHasMD("");
-            setDirItems(cache[currentPath]);
-            const mdFile = cache[currentPath].find((item: any) => item.basename.endsWith('.md'));
+            setHasMD("")
+            setDirItems(cache[currentPath])
+            const mdFile = cache[currentPath].find((item: any) => item.basename.endsWith('.md'))
             if (mdFile) {
-                setHasMD(mdFile.filename);
+                setHasMD(mdFile.filename)
             }
         } else {
-            fetchContents();
+            fetchContents()
         }
-    }, [currentPath]);
+    }, [currentPath])
+
+    useEffect(() => {
+        const handlePopState = (event?: PopStateEvent) => {
+            setCurrentPath(window.location.pathname === '/' ? '' : window.location.pathname)
+        }
+        handlePopState();
+        window.addEventListener('popstate', handlePopState)
+        return () => {
+            window.removeEventListener('popstate', handlePopState)
+        }
+    }, [])
 
     function setNewPath(_path: any) {
         for (const controller of fetchQueue) {
@@ -114,7 +110,7 @@ export default function Client({ title, initialPath }: any) {
         fetchQueue = []
         setCurrentPath(_path)
         if (_path == "") {
-            window.history.pushState(null, "", "/")
+            _path = "/"
         }
         window.history.pushState(null, "", _path)
     }

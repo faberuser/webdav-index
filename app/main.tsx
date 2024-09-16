@@ -2,11 +2,13 @@ import '@/styles/globals.css'
 
 import { Inter } from "next/font/google"
 import Head from 'next/head'
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import RootLayout from '@/app/layout'
 import dynamic from 'next/dynamic'
 
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+
+import RootLayout from '@/app/layout'
+import { title } from '@/config'
 
 const Client = dynamic(() => import('@/app/client'))
 
@@ -16,11 +18,12 @@ const inter = Inter({
     variable: '--font-inter',
 })
 
-export const Main = ({ currentPath, title }: any) => (
+export const Main = () => (
     <>
         <Head>
             <title>{title}</title>
             <meta property="og:title" content={title} key="title" />
+            <meta property="og:description" content={"Interface Indexer for " + title} key="title" />
         </Head>
         <style jsx global>
             {`html {
@@ -35,7 +38,7 @@ export const Main = ({ currentPath, title }: any) => (
             disableTransitionOnChange
         >
             <RootLayout>
-                <Client title={title} initialPath={currentPath} />
+                <Client title={title} />
             </RootLayout>
             <Toaster />
         </ThemeProvider>
