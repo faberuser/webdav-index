@@ -22,8 +22,8 @@ export const Main = () => (
     <>
         <Head>
             <title>{title}</title>
-            <meta property="og:title" content={title} key="title" />
-            <meta property="og:description" content={"Interface Indexer for " + title} key="title" />
+            <meta name="title" property="og:title" content={title} key="title" />
+            <meta name="description" property="og:description" content={"Interface Indexer for " + title} key="description" />
         </Head>
         <style jsx global>
             {`html {
