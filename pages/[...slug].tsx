@@ -1,7 +1,5 @@
 import { Main } from '@/app/main'
 
-const Slug = () => {
+export default function Slug() {
     return <Main />
-};
-
-export default Slug
+}

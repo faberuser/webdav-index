@@ -96,7 +96,7 @@ export default function Client({ title }: any) {
         const handlePopState = (event?: PopStateEvent) => {
             setCurrentPath(window.location.pathname === '/' ? '' : decodeURIComponent(window.location.pathname))
         }
-        handlePopState();
+        handlePopState()
         window.addEventListener('popstate', handlePopState)
         return () => {
             window.removeEventListener('popstate', handlePopState)
@@ -136,7 +136,6 @@ export default function Client({ title }: any) {
                                 key={dir.etag}
                                 dir={dir.basename}
                                 path={'/' + dir.basename}
-                                currentPath={currentPath}
                                 onChange={(_path: any) => setNewPath(_path)}
                             />
                         ))}
@@ -209,7 +208,7 @@ export default function Client({ title }: any) {
 }
 
 
-function ListDirs({ dir, path, currentPath = "", onChange }: any) {
+function ListDirs({ dir, path, onChange }: any) {
     const [isExpanded, setIsExpanded] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [subDirs, setSubDirs] = useState([])
@@ -239,24 +238,17 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
         }
     }
 
-    const handleAccess = () => {
-        if (!isExpanded || subDirs.length === 0) {
-            onChange(path)
-        }
-    }
-
     return (
         <div>
             <div className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">
-                {isLoading && <LoadingIcon />}
                 <div onClick={handleExpand} className="hover:text-gray-400 dark:hover:text-gray-600">
+                    {isLoading && <LoadingIcon />}
                     {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
                 </div>
-                {/* {currentPath.split('/').filter((x: string) => x).pop() === dir ? <span className="font-semibold text-gray-200 dark:text-gray-800">{dir}</span> : dir} */}
-                <div style={{ cursor: 'pointer' }} onClick={handleAccess} className="w-full h-full">
+                <div style={{ cursor: 'pointer' }} onClick={() => onChange(path)} className="w-full h-full">
                     <TooltipProvider>
                         <Tooltip>
-                            <div className="truncate w-full">
+                            <div className="text-nowrap w-full">
                                 <TooltipTrigger>
                                     {dir}
                                 </TooltipTrigger>
