@@ -237,9 +237,6 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
         } else {
             setIsExpanded(!isExpanded)
         }
-        // if (!isExpanded || subDirs.length === 0) {
-        //     onChange(path)
-        // }
     }
 
     const handleAccess = () => {
@@ -256,7 +253,7 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
                     {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
                 </div>
                 {/* {currentPath.split('/').filter((x: string) => x).pop() === dir ? <span className="font-semibold text-gray-200 dark:text-gray-800">{dir}</span> : dir} */}
-                <div style={{ cursor: 'pointer' }} onClick={handleAccess}>
+                <div style={{ cursor: 'pointer' }} onClick={handleAccess} className="w-full h-full">
                     <TooltipProvider>
                         <Tooltip>
                             <div className="truncate w-full">
