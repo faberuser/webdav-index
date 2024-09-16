@@ -59,6 +59,7 @@ export default function Client({ title, initialPath }: any) {
     const fetchRootContents = async () => {
         const response = await fetch(`/api/listContents?dir=`)
         const json = await response.json()
+        cache[""] = json
         setRootDirItems(json)
     }
 
