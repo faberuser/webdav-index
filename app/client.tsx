@@ -94,7 +94,7 @@ export default function Client({ title }: any) {
 
     useEffect(() => {
         const handlePopState = (event?: PopStateEvent) => {
-            setCurrentPath(window.location.pathname === '/' ? '' : window.location.pathname)
+            setCurrentPath(window.location.pathname === '/' ? '' : decodeURIComponent(window.location.pathname))
         }
         handlePopState();
         window.addEventListener('popstate', handlePopState)
