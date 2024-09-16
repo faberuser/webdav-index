@@ -56,14 +56,16 @@ export default function Client({ title, initialPath }: any) {
     const [isLoading, setIsLoading] = useState(false)
     const [hasMD, setHasMD] = useState("")
 
-    const fetchRootContents = async () => {
+    async function fetchRootContents() {
         const response = await fetch(`/api/listContents?dir=`)
         const json = await response.json()
-        cache[""] = json
         setRootDirItems(json)
     }
 
     const fetchContents = async () => {
+        if (rootDirItems.length === 0) {
+            await fetchRootContents()
+        }
         setHasMD("")
         setIsLoading(true)
         const response = await fetch(`/api/listContents?dir=${encodeURIComponent(currentPath)}`)
@@ -74,14 +76,10 @@ export default function Client({ title, initialPath }: any) {
         if (mdFile) {
             setHasMD(mdFile.filename)
         }
-        if (rootDirItems.length === 0) {
-            fetchRootContents()
-        }
         setIsLoading(false)
     }
 
     useEffect(() => {
-        // Set currentPath based on the current URL when the component mounts
         const initialPath = window.location.pathname === '/' ? '' : window.location.pathname;
         setCurrentPath(initialPath);
     }, []);
@@ -90,10 +88,7 @@ export default function Client({ title, initialPath }: any) {
         function handlePopState(event: PopStateEvent) {
             setCurrentPath(window.location.pathname === '/' ? '' : window.location.pathname);
         }
-
         window.addEventListener('popstate', handlePopState);
-
-        // Clean up the event listener when the component unmounts
         return () => {
             window.removeEventListener('popstate', handlePopState);
         };
@@ -118,6 +113,9 @@ export default function Client({ title, initialPath }: any) {
         }
         fetchQueue = []
         setCurrentPath(_path)
+        if (_path == "") {
+            window.history.pushState(null, "", "/")
+        }
         window.history.pushState(null, "", _path)
     }
 
@@ -131,10 +129,10 @@ export default function Client({ title, initialPath }: any) {
 
             <div className="hidden h-full w-64 shrink-0 border-r dark:border-gray-600 lg:block">
                 <div className="flex h-full flex-col gap-4 p-4">
-                    <Link href="#" className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-50" prefetch={false}>
+                    <div onClick={() => setNewPath("")} className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-50">
                         <FolderIcon className="h-6 w-6" />
                         <span>{title}</span>
-                    </Link>
+                    </div>
                     <nav className="ctscroll flex-1 space-y-2 overflow-auto">
 
                         {rootDirItems.filter((dir: any) => dir.type === "directory").map((dir: any) => (

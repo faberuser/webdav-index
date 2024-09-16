@@ -1,12 +1,6 @@
-import { useRouter } from 'next/router';
-import type { Metadata } from "next"
-import { Main } from '@/app/main';
+import { useRouter } from 'next/router'
+import { Main } from '@/app/main'
 import { title } from '@/config'
-
-export const metadata: Metadata = {
-    title: title,
-    description: "Interface Indexer for " + title,
-}
 
 const Slug = () => {
     const router = useRouter();
