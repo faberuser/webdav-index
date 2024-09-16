@@ -49,12 +49,18 @@ const cache: any = {}
 let fetchQueue: any = []
 
 
-export default function Client({ title }: any) {
+export default function Client({ title, initialPath }: any) {
     const [rootDirItems, setRootDirItems] = useState([])
     const [dirItems, setDirItems] = useState([])
-    const [currentPath, setCurrentPath] = useState("")
+    const [currentPath, setCurrentPath] = useState(initialPath)
     const [isLoading, setIsLoading] = useState(false)
     const [hasMD, setHasMD] = useState("")
+
+    const fetchRootContents = async () => {
+        const response = await fetch(`/api/listContents?dir=`)
+        const json = await response.json()
+        setRootDirItems(json)
+    }
 
     const fetchContents = async () => {
         setHasMD("")
@@ -68,23 +74,42 @@ export default function Client({ title }: any) {
             setHasMD(mdFile.filename)
         }
         if (rootDirItems.length === 0) {
-            setRootDirItems(json)
+            fetchRootContents()
         }
         setIsLoading(false)
     }
 
     useEffect(() => {
+        // Set currentPath based on the current URL when the component mounts
+        const initialPath = window.location.pathname === '/' ? '' : window.location.pathname;
+        setCurrentPath(initialPath);
+    }, []);
+
+    useEffect(() => {
+        function handlePopState(event: PopStateEvent) {
+            setCurrentPath(window.location.pathname === '/' ? '' : window.location.pathname);
+        }
+
+        window.addEventListener('popstate', handlePopState);
+
+        // Clean up the event listener when the component unmounts
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, []);
+
+    useEffect(() => {
         if (cache[currentPath]) {
-            setHasMD("")
-            setDirItems(cache[currentPath])
-            const mdFile = cache[currentPath].find((item: any) => item.basename.endsWith('.md'))
+            setHasMD("");
+            setDirItems(cache[currentPath]);
+            const mdFile = cache[currentPath].find((item: any) => item.basename.endsWith('.md'));
             if (mdFile) {
-                setHasMD(mdFile.filename)
+                setHasMD(mdFile.filename);
             }
         } else {
-            fetchContents()
+            fetchContents();
         }
-    }, [currentPath])
+    }, [currentPath]);
 
     function setNewPath(_path: any) {
         for (const controller of fetchQueue) {
@@ -92,6 +117,7 @@ export default function Client({ title }: any) {
         }
         fetchQueue = []
         setCurrentPath(_path)
+        window.history.pushState(null, "", _path)
     }
 
     return (
@@ -160,7 +186,7 @@ export default function Client({ title }: any) {
 
                             </div>
                         </div>
-                        <div className="hidden md:block w-80 border-l dark:border-gray-600 text-gray-700 dark:text-gray-300 p-4 overflow-auto ctscroll">
+                        <div className="hidden md:block w-80 border-l dark:border-gray-600 text-gray-700 dark:text-gray-300 p-4 overflow-auto ctscroll allow-select">
                             <h2 className="text-lg font-semibold">
                                 {hasMD.split('/').filter((x: string) => x).pop()}
                             </h2>
@@ -216,6 +242,12 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
         } else {
             setIsExpanded(!isExpanded)
         }
+        // if (!isExpanded || subDirs.length === 0) {
+        //     onChange(path)
+        // }
+    }
+
+    const handleAccess = () => {
         if (!isExpanded || subDirs.length === 0) {
             onChange(path)
         }
@@ -223,22 +255,26 @@ function ListDirs({ dir, path, currentPath = "", onChange }: any) {
 
     return (
         <div>
-            <div style={{ cursor: 'pointer' }} onClick={handleExpand} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">
+            <div className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">
                 {isLoading && <LoadingIcon />}
-                {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
+                <div onClick={handleExpand} className="hover:text-gray-400 dark:hover:text-gray-600">
+                    {!isLoading && subDirs.length > 0 && (isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />)}
+                </div>
                 {/* {currentPath.split('/').filter((x: string) => x).pop() === dir ? <span className="font-semibold text-gray-200 dark:text-gray-800">{dir}</span> : dir} */}
-                <TooltipProvider>
-                    <Tooltip>
-                        <div className="truncate w-full">
-                            <TooltipTrigger>
+                <div style={{ cursor: 'pointer' }} onClick={handleAccess}>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <div className="truncate w-full">
+                                <TooltipTrigger>
+                                    {dir}
+                                </TooltipTrigger>
+                            </div>
+                            <TooltipContent className="bg-white dark:bg-black">
                                 {dir}
-                            </TooltipTrigger>
-                        </div>
-                        <TooltipContent className="bg-white dark:bg-black">
-                            {dir}
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
             </div>
             {isExpanded && subDirs.map((subDir: any) => (
                 <div key={subDir.etag} style={{ marginLeft: '10px' }}>

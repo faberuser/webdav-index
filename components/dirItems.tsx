@@ -386,7 +386,7 @@ export function DisplayTextFile({ dir }: any) {
                     <DisplayBasename dir={dir} />
                 </div>
             </SheetTrigger>
-            <SheetContent className={backgroundClass("overflow-auto ctscroll text-gray-700 dark:text-gray-300")}>
+            <SheetContent className={backgroundClass("overflow-auto ctscroll text-gray-700 dark:text-gray-300 allow-select")}>
                 <SheetHeader>
                     <SheetTitle className={nameTitleClass("")}>
                         {dir.basename}

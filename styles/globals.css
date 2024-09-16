@@ -66,11 +66,8 @@
 body {
   font-family: var(--font-inter), sans-serif;
   -webkit-user-select: none;
-  /* Safari */
   -ms-user-select: none;
-  /* IE 10 and IE 11 */
   user-select: none;
-  /* Standard syntax */
 }
 
 h1,
@@ -81,16 +78,6 @@ h5,
 h6 {
   font-family: var(--font-inter), sans-serif;
 }
-
-/* @layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
-} */
 
 @layer utilities {
   .ctscroll::-webkit-scrollbar {
@@ -109,4 +96,10 @@ h6 {
 
 .grid-auto-rows {
   grid-auto-rows: 1fr;
+}
+
+.allow-select {
+  -webkit-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }

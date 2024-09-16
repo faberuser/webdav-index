@@ -12,7 +12,7 @@ Tested using Nextcloud as WebDav provider [link](https://docs.nextcloud.com/serv
 ## Install next.js
 
 ```bash
-npm install next
+npm install
 ```
 
 ## Getting Started
@@ -53,7 +53,7 @@ npm run start
 
 - [x] Image thumbnail in immediate sub-dir
 - [x] Preview .md in path and other text files
-- [ ] Back/Forward
+- [x] Back/Forward
 - [ ] List view
 - [ ] Sort by name, last modified
 - [ ] Search
