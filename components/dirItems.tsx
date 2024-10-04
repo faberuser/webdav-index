@@ -131,18 +131,12 @@ function DisplayDownloadButton({ dir }: any) {
 
 
 async function downloadFile(filepath: string) {
-    const response = await fetch(`/api/download?filename=${encodeURIComponent(filepath)}`)
-
-    if (!response.ok) {
-        throw new Error('Failed to download file')
-    }
-
-    const link = document.createElement('a')
-    link.href = response.url
-    link.download = path.basename(filepath)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    const fileLink = document.createElement('a')
+    const downloadURL = `/api/download?filename=${encodeURIComponent(filepath)}`
+    const fileName = path.basename(filepath)
+    fileLink.href = downloadURL
+    fileLink.download = fileName
+    fileLink.click()
 }
 
 

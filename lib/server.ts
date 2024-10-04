@@ -138,8 +138,7 @@ export async function getPreview(filename: string) {
 
 
 export async function getDownloadURL(filename: string) {
-    const downloadLink: string = client.getFileDownloadLink(root_dir + filename)
-    return URL.createObjectURL(new Blob([downloadLink]))
+    return client.getFileDownloadLink(root_dir + filename)
 }
 
 

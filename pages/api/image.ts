@@ -14,8 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (typeof filename === 'string') {
         const fileContent = await utils.getFileContent(filename)
         res.status(200).send(fileContent)
-        return
     } else {
         res.status(400).json({ error: 'Invalid filename' })
     }
+    return
 }
