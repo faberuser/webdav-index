@@ -51,11 +51,18 @@ const previewCache: any = {}
 const imageCache: any = {}
 const textCache: any = {}
 
+function truncateString(str: string, maxLength: number): string {
+    if (str.length > maxLength) {
+        return str.substring(0, maxLength) + '...';
+    }
+    return str;
+}
+
 const toastTitle = ({ dir }: any) =>
     "Downloading file with " + DisplaySize({ dir })
 
 const toastDescription = ({ dir }: any) =>
-    dir.basename
+    truncateString(dir.basename, 25)
 
 const backgroundClass = (props: any) =>
     props + " bg-white dark:bg-black"
@@ -103,11 +110,11 @@ function DisplaySize({ dir }: any) {
 }
 
 
-function DisplayDownloadButton({ dir }: any) {
+function DisplayDownloadButton({ dir, listView }: any) {
     const { toast } = useToast()
 
     return (
-        <Button variant="outline" size="sm" className="absolute top-1 right-1 border-gray-200 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-400"
+        <Button size="sm" className={listView == false ? "absolute top-1 right-1 hover:bg-gray-200 dark:hover:bg-gray-800" : "hover:bg-gray-200 dark:hover:bg-gray-800"}
             onClick={async (e) => {
                 e.preventDefault()
                 try {
@@ -162,7 +169,7 @@ async function fetchAndSet(url: string, cache: any, setFunc: any, filename: stri
 }
 
 
-export function DisplayDir({ dir, onChange, fetchQueue }: any) {
+export function DisplayDir({ dir, onChange, fetchQueue, listView }: any) {
     const [preview, setPreview] = useState("")
     const [isLoading, setIsLoading] = useState(false)
 
@@ -185,53 +192,19 @@ export function DisplayDir({ dir, onChange, fetchQueue }: any) {
         }
     }, [dir.hasThumbnail, preview])
 
-    return (
-        dir.hasThumbnail != null ?
-            <HoverCard>
-                <HoverCardTrigger asChild className="h-full w-full">
-                    <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className={cardClass("")}>
-                        {isLoading ?
-                            <DisplayIcon icon={<LoadingIcon />} />
-                            :
-                            preview &&
-                            <DisplayIcon icon={
-                                <Image
-                                    src={preview}
-                                    alt={dir.basename}
-                                    width={0}
-                                    height={0}
-                                    sizes="100vw"
-                                    className="w-full h-full object-cover rounded-md"
-                                />
-                            } />
-                        }
-                        <DisplayBasename dir={dir} />
-                    </div>
-                </HoverCardTrigger>
-                <HoverCardContent className={backgroundClass("")}>
-                    {dir.basename}
-                    {isLoading ?
-                        <div className="flex items-center justify-center">
-                            <ImageIcon className="h-24 w-24" />
-                        </div>
-                        :
-                        preview && <Image
-                            src={preview}
-                            alt={dir.basename}
-                            width={0}
-                            height={0}
-                            sizes="100vw"
-                            className="w-full h-full rounded-md"
-                        />}
-                </HoverCardContent>
-            </HoverCard>
-            :
+    if (listView) {
+        return (
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild className="h-full w-full">
-                        <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className={cardClass("")}>
-                            <DisplayIcon icon={<FolderIcon className="h-12 w-12" />} />
-                            <DisplayBasename dir={dir} />
+                        <div className="flex items-center gap-4 p-3 rounded-md shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 text-gray-500 dark:text-gray-400"
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => onChange(dir.filename)}>
+                            <FolderIcon className="h-8 w-8" />
+
+                            <div className="flex-1">
+                                <div className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</div>
+                            </div>
                         </div>
                     </TooltipTrigger>
                     <TooltipContent className={backgroundClass("")}>
@@ -239,11 +212,68 @@ export function DisplayDir({ dir, onChange, fetchQueue }: any) {
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
-    )
+        )
+    } else {
+        return (
+            dir.hasThumbnail != null ?
+                <HoverCard>
+                    <HoverCardTrigger asChild className="h-full w-full">
+                        <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className={cardClass("")}>
+                            {isLoading ?
+                                <DisplayIcon icon={<LoadingIcon />} />
+                                :
+                                preview &&
+                                <DisplayIcon icon={
+                                    <Image
+                                        src={preview}
+                                        alt={dir.basename}
+                                        width={0}
+                                        height={0}
+                                        sizes="100vw"
+                                        className="w-full h-full object-cover rounded-md"
+                                    />
+                                } />
+                            }
+                            <DisplayBasename dir={dir} />
+                        </div>
+                    </HoverCardTrigger>
+                    <HoverCardContent className={backgroundClass("")}>
+                        {dir.basename}
+                        {isLoading ?
+                            <div className="flex items-center justify-center">
+                                <ImageIcon className="h-24 w-24" />
+                            </div>
+                            :
+                            preview && <Image
+                                src={preview}
+                                alt={dir.basename}
+                                width={0}
+                                height={0}
+                                sizes="100vw"
+                                className="w-full h-full rounded-md"
+                            />}
+                    </HoverCardContent>
+                </HoverCard>
+                :
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild className="h-full w-full">
+                            <div style={{ cursor: 'pointer' }} onClick={() => onChange(dir.filename)} className={cardClass("")}>
+                                <DisplayIcon icon={<FolderIcon className="h-12 w-12" />} />
+                                <DisplayBasename dir={dir} />
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent className={backgroundClass("")}>
+                            {dir.basename}
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+        )
+    }
 }
 
 
-export function DisplayImage({ dir, fetchQueue }: any) {
+export function DisplayImage({ dir, fetchQueue, listView }: any) {
     const [preview, setPreview] = useState("")
     const [image, setImage] = useState("")
     const [isLoading, setIsLoading] = useState(false)
@@ -281,36 +311,133 @@ export function DisplayImage({ dir, fetchQueue }: any) {
         }
     }
 
-    return (
-        <Dialog>
-            <DialogTrigger asChild className="h-full w-full">
-                <div style={{ cursor: 'pointer' }} className={cardClass("p-0")} onClick={() => getImage(dir.filename)}>
-                    <div className="flex h-full w-full items-center justify-center text-gray-500 dark:text-gray-400">
-                        <DisplayDownloadButton dir={dir} />
-                        {isLoading ?
-                            <LoadingIcon />
-                            :
-                            preview && <Image
-                                src={preview}
-                                alt={dir.basename}
-                                width={0}
-                                height={0}
-                                sizes="100vw"
-                                className="w-full h-full object-cover rounded-md"
-                            />
-                        }
+    if (listView) {
+        return (
+            <Dialog>
+                <DialogTrigger asChild className="h-full w-full">
+                    <div className="flex items-center gap-4 p-3 rounded-md shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 text-gray-500 dark:text-gray-400"
+                        style={{ cursor: 'pointer' }} onClick={() => getImage(dir.filename)}>
+                        <ImageIcon className="h-8 w-8" />
+
+                        <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</div>
+                            <span className={muteTextClass("")}>
+                                <DisplaySize dir={dir} />
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <DisplayDownloadButton dir={dir} listView={true} />
+                        </div>
                     </div>
-                </div>
-            </DialogTrigger>
-            <DialogContent className={backgroundClass("max-w-min max-h-screen")}>
-                {isImageLoading ?
+                </DialogTrigger>
+                <DialogContent className={backgroundClass("max-w-min max-h-screen")}>
+                    {isImageLoading ?
+                        <DialogHeader>
+                            <DialogTitle></DialogTitle>
+                            <DialogDescription className="p-2">
+                                <LoadingIconLarge />
+                            </DialogDescription>
+                        </DialogHeader>
+                        : image && <DialogHeader>
+                            <DialogTitle className={nameTitleClass("pr-5")}>
+                                {dir.basename}
+                                <span className={muteTextClass("")}>
+                                    <DisplaySize dir={dir} />
+                                </span>
+                            </DialogTitle>
+                            <DialogDescription className="flex items-center justify-center">
+                                <Image
+                                    src={image}
+                                    alt={dir.basename}
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="max-h-[90vh] max-w-[90vw] w-auto h-full"
+                                />
+                            </DialogDescription>
+                        </DialogHeader>
+                    }
+                </DialogContent>
+            </Dialog>
+        )
+    } else {
+        return (
+            <Dialog>
+                <DialogTrigger asChild className="h-full w-full">
+                    <div style={{ cursor: 'pointer' }} className={cardClass("p-0")} onClick={() => getImage(dir.filename)}>
+                        <div className="flex h-full w-full items-center justify-center text-gray-500 dark:text-gray-400">
+                            <DisplayDownloadButton dir={dir} listView={false} />
+                            {isLoading ?
+                                <LoadingIcon />
+                                :
+                                preview && <Image
+                                    src={preview}
+                                    alt={dir.basename}
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="w-full h-full object-cover rounded-md"
+                                />
+                            }
+                        </div>
+                    </div>
+                </DialogTrigger>
+                <DialogContent className={backgroundClass("max-w-min max-h-screen")}>
+                    {isImageLoading ?
+                        <DialogHeader>
+                            <DialogTitle></DialogTitle>
+                            <DialogDescription className="p-2">
+                                <LoadingIconLarge />
+                            </DialogDescription>
+                        </DialogHeader>
+                        : image && <DialogHeader>
+                            <DialogTitle className={nameTitleClass("pr-5")}>
+                                {dir.basename}
+                                <span className={muteTextClass("")}>
+                                    <DisplaySize dir={dir} />
+                                </span>
+                            </DialogTitle>
+                            <DialogDescription className="flex items-center justify-center">
+                                <Image
+                                    src={image}
+                                    alt={dir.basename}
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="max-h-[90vh] max-w-[90vw] w-auto h-full"
+                                />
+                            </DialogDescription>
+                        </DialogHeader>
+                    }
+                </DialogContent>
+            </Dialog>
+        )
+    }
+}
+
+
+export function DisplayVideo({ dir, listView }: any) {
+    if (listView) {
+        return (
+            <Dialog>
+                <DialogTrigger asChild className="h-full w-full">
+                    <div className="flex items-center gap-4 p-3 rounded-md shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 text-gray-500 dark:text-gray-400"
+                        style={{ cursor: 'pointer' }}>
+                        <VideoIcon className="h-8 w-8" />
+
+                        <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</div>
+                            <span className={muteTextClass("")}>
+                                <DisplaySize dir={dir} />
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <DisplayDownloadButton dir={dir} listView={true} />
+                        </div>
+                    </div>
+                </DialogTrigger>
+                <DialogContent className={backgroundClass("max-w-min max-h-screen")}>
                     <DialogHeader>
-                        <DialogTitle></DialogTitle>
-                        <DialogDescription className="p-2">
-                            <LoadingIconLarge />
-                        </DialogDescription>
-                    </DialogHeader>
-                    : image && <DialogHeader>
                         <DialogTitle className={nameTitleClass("pr-5")}>
                             {dir.basename}
                             <span className={muteTextClass("")}>
@@ -318,83 +445,116 @@ export function DisplayImage({ dir, fetchQueue }: any) {
                             </span>
                         </DialogTitle>
                         <DialogDescription className="flex items-center justify-center">
-                            <Image
-                                src={image}
-                                alt={dir.basename}
+                            <video controls autoPlay
+                                src={`/api/video?filename=${dir.filename}`}
                                 width={0}
                                 height={0}
-                                sizes="100vw"
                                 className="max-h-[90vh] max-w-[90vw] w-auto h-full"
-                            />
+                            >
+                                Your browser does not support the video tag.
+                            </video>
                         </DialogDescription>
                     </DialogHeader>
-                }
-            </DialogContent>
-        </Dialog >
-    )
+                </DialogContent>
+            </Dialog>
+        )
+    } else {
+        return (
+            <Dialog>
+                <DialogTrigger asChild className="h-full w-full">
+                    <div style={{ cursor: 'pointer' }} className={cardClass("")}>
+                        <DisplayDownloadButton dir={dir} listView={false} />
+                        <DisplayIcon icon={<VideoIcon className="h-12 w-12" />} />
+                        <DisplayBasename dir={dir} />
+                    </div>
+                </DialogTrigger>
+                <DialogContent className={backgroundClass("max-w-min max-h-screen")}>
+                    <DialogHeader>
+                        <DialogTitle className={nameTitleClass("pr-5")}>
+                            {dir.basename}
+                            <span className={muteTextClass("")}>
+                                <DisplaySize dir={dir} />
+                            </span>
+                        </DialogTitle>
+                        <DialogDescription className="flex items-center justify-center">
+                            <video controls autoPlay
+                                src={`/api/video?filename=${dir.filename}`}
+                                width={0}
+                                height={0}
+                                className="max-h-[90vh] max-w-[90vw] w-auto h-full"
+                            >
+                                Your browser does not support the video tag.
+                            </video>
+                        </DialogDescription>
+                    </DialogHeader>
+                </DialogContent>
+            </Dialog>
+        )
+    }
 }
 
 
-export function DisplayVideo({ dir }: any) {
-    return (
-        <Dialog>
-            <DialogTrigger asChild className="h-full w-full">
-                <div style={{ cursor: 'pointer' }} className={cardClass("")}>
-                    <DisplayDownloadButton dir={dir} />
-                    <DisplayIcon icon={<VideoIcon className="h-12 w-12" />} />
-                    <DisplayBasename dir={dir} />
-                </div>
-            </DialogTrigger>
-            <DialogContent className={backgroundClass("max-w-min max-h-screen")}>
-                <DialogHeader>
-                    <DialogTitle className={nameTitleClass("pr-5")}>
-                        {dir.basename}
-                        <span className={muteTextClass("")}>
-                            <DisplaySize dir={dir} />
-                        </span>
-                    </DialogTitle>
-                    <DialogDescription className="flex items-center justify-center">
-                        <video controls autoPlay
-                            src={`/api/video?filename=${dir.filename}`}
-                            width={0}
-                            height={0}
-                            className="max-h-[90vh] max-w-[90vw] w-auto h-full"
-                        >
-                            Your browser does not support the video tag.
-                        </video>
-                    </DialogDescription>
-                </DialogHeader>
-            </DialogContent>
-        </Dialog>
-    )
-}
+export function DisplayTextFile({ dir, listView }: any) {
+    if (listView) {
+        return (
+            <Sheet>
+                <SheetTrigger asChild className="h-full w-full">
+                    <div className="flex items-center gap-4 p-3 rounded-md shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 text-gray-500 dark:text-gray-400"
+                        style={{ cursor: 'pointer' }}>
+                        <TextFileIcon className="h-8 w-8" />
 
-
-export function DisplayTextFile({ dir }: any) {
-    return (
-        <Sheet>
-            <SheetTrigger asChild className="h-full w-full">
-                <div style={{ cursor: 'pointer' }} className={cardClass("")}>
-                    <DisplayDownloadButton dir={dir} />
-                    <DisplayIcon icon={<TextFileIcon className="h-12 w-12" />} />
-                    <DisplayBasename dir={dir} />
-                </div>
-            </SheetTrigger>
-            <SheetContent className={backgroundClass("overflow-auto ctscroll text-gray-700 dark:text-gray-300 allow-select")}>
-                <SheetHeader>
-                    <SheetTitle className={nameTitleClass("")}>
-                        {dir.basename}
-                        <span className={muteTextClass("pr-5")}>
-                            <DisplaySize dir={dir} />
-                        </span>
-                    </SheetTitle>
-                    <SheetDescription className="whitespace-pre-wrap break-words text-pretty">
-                        <DisplayText filename={dir.filename} />
-                    </SheetDescription>
-                </SheetHeader>
-            </SheetContent>
-        </Sheet >
-    )
+                        <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</div>
+                            <span className={muteTextClass("")}>
+                                <DisplaySize dir={dir} />
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <DisplayDownloadButton dir={dir} listView={true} />
+                        </div>
+                    </div>
+                </SheetTrigger>
+                <SheetContent className={backgroundClass("overflow-auto ctscroll text-gray-700 dark:text-gray-300 allow-select")}>
+                    <SheetHeader>
+                        <SheetTitle className={nameTitleClass("")}>
+                            {dir.basename}
+                            <span className={muteTextClass("pr-5")}>
+                                <DisplaySize dir={dir} />
+                            </span>
+                        </SheetTitle>
+                        <SheetDescription className="whitespace-pre-wrap break-words text-pretty">
+                            <DisplayText filename={dir.filename} />
+                        </SheetDescription>
+                    </SheetHeader>
+                </SheetContent>
+            </Sheet>
+        )
+    } else {
+        return (
+            <Sheet>
+                <SheetTrigger asChild className="h-full w-full">
+                    <div style={{ cursor: 'pointer' }} className={cardClass("")}>
+                        <DisplayDownloadButton dir={dir} listView={false} />
+                        <DisplayIcon icon={<TextFileIcon className="h-12 w-12" />} />
+                        <DisplayBasename dir={dir} />
+                    </div>
+                </SheetTrigger>
+                <SheetContent className={backgroundClass("overflow-auto ctscroll text-gray-700 dark:text-gray-300 allow-select")}>
+                    <SheetHeader>
+                        <SheetTitle className={nameTitleClass("")}>
+                            {dir.basename}
+                            <span className={muteTextClass("pr-5")}>
+                                <DisplaySize dir={dir} />
+                            </span>
+                        </SheetTitle>
+                        <SheetDescription className="whitespace-pre-wrap break-words text-pretty">
+                            <DisplayText filename={dir.filename} />
+                        </SheetDescription>
+                    </SheetHeader>
+                </SheetContent>
+            </Sheet>
+        )
+    }
 }
 
 
@@ -434,30 +594,67 @@ export function DisplayText({ filename, fetchQueue }: any) {
 }
 
 
-export function DisplayFile({ dir }: any) {
-    return (
-        <HoverCard>
-            <HoverCardTrigger asChild className="h-full w-full">
-                <div className={cardClass("")}>
-                    <DisplayDownloadButton dir={dir} />
-                    {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
-                        <DisplayIcon icon={<ZipIcon className="h-12 w-12" />} />
-                        :
-                        <DisplayIcon icon={<FileIcon className="h-12 w-12" />} />
-                    }
-                    <DisplayBasename dir={dir} />
-                </div>
-            </HoverCardTrigger>
-            <HoverCardContent className={backgroundClass("w-full")}>
-                <div className="flex justify-between space-x-4">
-                    <div className="space-y-1">
-                        {dir.basename}
-                        <span className={muteTextClass("pt-2")}>
-                            <DisplaySize dir={dir} />
-                        </span>
+export function DisplayFile({ dir, listView }: any) {
+    if (listView) {
+        return (
+            <HoverCard>
+                <HoverCardTrigger asChild className="h-full w-full">
+                    <div className="flex items-center gap-4 p-3 rounded-md shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 text-gray-500 dark:text-gray-400"
+                        style={{ cursor: 'pointer' }}>
+                        {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
+                            <ZipIcon className="h-8 w-8" />
+                            :
+                            <FileIcon className="h-8 w-8" />
+                        }
+
+                        <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</div>
+                            <span className={muteTextClass("")}>
+                                <DisplaySize dir={dir} />
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <DisplayDownloadButton dir={dir} listView={true} />
+                        </div>
                     </div>
-                </div>
-            </HoverCardContent>
-        </HoverCard>
-    )
+                </HoverCardTrigger>
+                <HoverCardContent className={backgroundClass("w-full")}>
+                    <div className="flex justify-between space-x-4">
+                        <div className="space-y-1">
+                            {dir.basename}
+                            <span className={muteTextClass("pt-2")}>
+                                <DisplaySize dir={dir} />
+                            </span>
+                        </div>
+                    </div>
+                </HoverCardContent>
+            </HoverCard>
+        )
+    } else {
+        return (
+            <HoverCard>
+                <HoverCardTrigger asChild className="h-full w-full">
+                    <div className={cardClass("")}>
+                        <DisplayDownloadButton dir={dir} listView={false} />
+                        {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
+                            <DisplayIcon icon={<ZipIcon className="h-12 w-12" />} />
+                            :
+                            <DisplayIcon icon={<FileIcon className="h-12 w-12" />} />
+                        }
+                        <DisplayBasename dir={dir} />
+                    </div>
+                </HoverCardTrigger>
+                <HoverCardContent className={backgroundClass("w-full")}>
+                    <div className="flex justify-between space-x-4">
+                        <div className="space-y-1">
+                            {dir.basename}
+                            <span className={muteTextClass("pt-2")}>
+                                <DisplaySize dir={dir} />
+                            </span>
+                        </div>
+                    </div>
+                </HoverCardContent>
+            </HoverCard>
+        )
+    }
 }

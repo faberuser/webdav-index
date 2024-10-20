@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react"
 import RenderIfVisible from '@/components/RenderIfVisible'
 
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/toggleMode"
-import { ChevronDown, Slash } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import {
     FolderIcon,
     MenuIcon,
@@ -14,7 +13,9 @@ import {
     ArrowRightIcon,
     LoadingIcon,
     LoadingIconLarge,
-    GitHubIcon
+    GitHubIcon,
+    HomeIcon,
+    ListIcon
 } from "@/components/icons"
 import {
     Breadcrumb,
@@ -55,6 +56,7 @@ export default function Client({ title }: any) {
     const [currentPath, setCurrentPath] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [hasMD, setHasMD] = useState("")
+    const [isListView, setIsListView] = useState(false)
 
     async function fetchRootContents() {
         const response = await fetch(`/api/listContents?dir=`)
@@ -93,6 +95,9 @@ export default function Client({ title }: any) {
     }, [currentPath])
 
     useEffect(() => {
+        const savedState = localStorage.getItem('isListView')
+        setIsListView(savedState !== null ? JSON.parse(savedState) : false)
+
         const handlePopState = (event?: PopStateEvent) => {
             setCurrentPath(window.location.pathname === '/' ? '' : decodeURIComponent(window.location.pathname))
         }
@@ -102,6 +107,11 @@ export default function Client({ title }: any) {
             window.removeEventListener('popstate', handlePopState)
         }
     }, [])
+
+    function handleListView(value: any) {
+        setIsListView(value);
+        localStorage.setItem('isListView', JSON.stringify(value));
+    }
 
     function setNewPath(_path: any) {
         for (const controller of fetchQueue) {
@@ -159,27 +169,46 @@ export default function Client({ title }: any) {
 
                     </div>
                     <div className="flex items-center gap-4">
+                        <Button
+                            size="icon"
+                            className={isListView ? "bg-gray-200 dark:bg-gray-800" : "hover:bg-gray-200 dark:hover:bg-gray-800"}
+                            onClick={() => handleListView(!isListView)}
+                        >
+                            <ListIcon className="h-[1.2rem] w-[1.2rem]" />
+                        </Button>
                         <a target="_blank" rel="noreferrer" href="https://github.com/faberuser/webdav-index">
-                            <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground py-2 h-8 w-8 px-0">
-                                <GitHubIcon className="h-5 w-5" />
+                            <Button size="icon" className="hover:bg-gray-200 dark:hover:bg-gray-800">
+                                <GitHubIcon className="h-[1.2rem] w-[1.2rem]" />
                                 <span className="sr-only">GitHub</span>
-                            </div>
+                            </Button>
                         </a>
                         <ModeToggle />
                     </div>
                 </div>
                 {hasMD ? (
                     <div className="flex h-full overflow-hidden">
-                        <div className="flex-1 overflow-auto p-4 md:p-6 ctscroll">
-                            <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-7 auto-rows-min">
-
-                                <AccessDir
-                                    items={dirItems}
-                                    onChange={(_path: any) => setNewPath(_path)}
-                                />
-
+                        {isListView ? (
+                            <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+                                <div className="grid gap-2">
+                                    <AccessDir
+                                        items={dirItems}
+                                        onChange={(_path: any) => setNewPath(_path)}
+                                        listView={isListView}
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="flex-1 overflow-auto p-4 md:p-6 ctscroll">
+                                <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-7 auto-rows-min">
+                                    <AccessDir
+                                        items={dirItems}
+                                        onChange={(_path: any) => setNewPath(_path)}
+                                        listView={isListView}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         <div className="hidden md:block w-80 border-l dark:border-gray-600 text-gray-700 dark:text-gray-300 p-4 overflow-auto ctscroll allow-select">
                             <h2 className="text-lg font-semibold">
                                 {hasMD.split('/').filter((x: string) => x).pop()}
@@ -190,16 +219,27 @@ export default function Client({ title }: any) {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex-1 h-full overflow-auto p-4 md:p-6">
-                        <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9 auto-rows-min">
-
-                            <AccessDir
-                                items={dirItems}
-                                onChange={(_path: any) => setNewPath(_path)}
-                            />
-
+                    isListView ? (
+                        <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+                            <div className="grid gap-2">
+                                <AccessDir
+                                    items={dirItems}
+                                    onChange={(_path: any) => setNewPath(_path)}
+                                    listView={isListView}
+                                />
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="flex-1 h-full overflow-auto p-4 md:p-6">
+                            <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9 auto-rows-min">
+                                <AccessDir
+                                    items={dirItems}
+                                    onChange={(_path: any) => setNewPath(_path)}
+                                    listView={isListView}
+                                />
+                            </div>
+                        </div>
+                    )
                 )}
             </div>
 
@@ -278,7 +318,7 @@ function getFileExtension(filename: string) {
 }
 
 
-function AccessDir({ items, onChange }: any) {
+function AccessDir({ items, onChange, listView }: any) {
     const fileExtensionToComponent: any = {
         '.png': DisplayImage,
         '.jpg': DisplayImage,
@@ -288,6 +328,7 @@ function AccessDir({ items, onChange }: any) {
         '.webp': DisplayImage,
 
         '.mp4': DisplayVideo,
+        '.mkv': DisplayVideo,
 
         '.md': DisplayTextFile,
         '.txt': DisplayTextFile,
@@ -304,7 +345,7 @@ function AccessDir({ items, onChange }: any) {
 
             return (
                 <RenderIfVisible key={dir.etag} stayRendered={true}>
-                    <Component key={dir.etag} dir={dir} onChange={onChange} fetchQueue={fetchQueue} />
+                    <Component key={dir.etag} dir={dir} onChange={onChange} fetchQueue={fetchQueue} listView={listView} />
                 </RenderIfVisible>
             )
         })
@@ -324,7 +365,9 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                 <BreadcrumbList>
 
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Home</BreadcrumbPage>
+                        <BreadcrumbPage>
+                            <HomeIcon className="h-4 w-4" />
+                        </BreadcrumbPage>
                     </BreadcrumbItem>
 
                 </BreadcrumbList>
@@ -336,12 +379,12 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                 <BreadcrumbList>
 
                     <BreadcrumbItem>
-                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("")}>Home</BreadcrumbPage>
+                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("")}>
+                            <HomeIcon className="h-4 w-4" />
+                        </BreadcrumbPage>
                     </BreadcrumbItem>
 
-                    <BreadcrumbSeparator>
-                        <Slash />
-                    </BreadcrumbSeparator>
+                    <BreadcrumbSeparator />
 
                     <BreadcrumbItem>
                         <BreadcrumbPage >{lastPath}</BreadcrumbPage>
@@ -356,20 +399,18 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                 <BreadcrumbList>
 
                     <BreadcrumbItem>
-                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("")}>Home</BreadcrumbPage>
+                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("")}>
+                            <HomeIcon className="h-4 w-4" />
+                        </BreadcrumbPage>
                     </BreadcrumbItem>
 
-                    <BreadcrumbSeparator>
-                        <Slash />
-                    </BreadcrumbSeparator>
+                    <BreadcrumbSeparator />
 
                     <BreadcrumbItem>
                         <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("/" + secondLastPath)} className="truncate">{secondLastPath}</BreadcrumbPage>
                     </BreadcrumbItem>
 
-                    <BreadcrumbSeparator>
-                        <Slash />
-                    </BreadcrumbSeparator>
+                    <BreadcrumbSeparator />
 
                     <BreadcrumbItem>
                         <BreadcrumbPage>{lastPath}</BreadcrumbPage>
@@ -384,12 +425,12 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                 <BreadcrumbList>
 
                     <BreadcrumbItem>
-                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("")}>Home</BreadcrumbPage>
+                        <BreadcrumbPage style={{ cursor: 'pointer' }} onClick={() => onChange("")}>
+                            <HomeIcon className="h-4 w-4" />
+                        </BreadcrumbPage>
                     </BreadcrumbItem>
 
-                    <BreadcrumbSeparator>
-                        <Slash />
-                    </BreadcrumbSeparator>
+                    <BreadcrumbSeparator />
 
                     <BreadcrumbItem>
                         <DropdownMenu>
@@ -416,9 +457,7 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                         </DropdownMenu>
                     </BreadcrumbItem>
 
-                    <BreadcrumbSeparator>
-                        <Slash />
-                    </BreadcrumbSeparator>
+                    <BreadcrumbSeparator />
 
                     <BreadcrumbItem>
                         <BreadcrumbPage>{lastPath}</BreadcrumbPage>

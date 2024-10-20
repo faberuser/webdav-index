@@ -54,7 +54,7 @@ npm run start
 - [x] Image thumbnail in immediate sub-dir
 - [x] Preview .md in path and other text files
 - [x] Back/Forward
-- [ ] List view
+- [x] List view
 - [ ] Sort by name, last modified
 - [ ] Search
 - [ ] Share with path/location
