@@ -242,7 +242,7 @@ export default function Client({ title }: any) {
                 {hasMD ? (
                     <div className="flex h-full overflow-hidden">
                         {isListView ? (
-                            <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+                            <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 overflow-auto ctscroll">
                                 <div className="grid gap-2">
                                     <AccessDir
                                         items={dirItems}
@@ -274,7 +274,7 @@ export default function Client({ title }: any) {
                     </div>
                 ) : (
                     isListView ? (
-                        <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+                        <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 overflow-auto ctscroll">
                             <div className="grid gap-2">
                                 <AccessDir
                                     items={dirItems}
@@ -284,7 +284,7 @@ export default function Client({ title }: any) {
                             </div>
                         </div>
                     ) : (
-                        <div className="flex-1 h-full overflow-auto p-4 md:p-6">
+                        <div className="flex-1 overflow-auto p-4 md:p-6">
                             <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9 auto-rows-min">
                                 <AccessDir
                                     items={dirItems}
