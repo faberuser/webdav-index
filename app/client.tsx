@@ -5,12 +5,13 @@ import RenderIfVisible from '@/components/RenderIfVisible'
 
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/toggleMode"
-import { ChevronDown } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
 import {
     FolderIcon,
     MenuIcon,
     ArrowDownIcon,
     ArrowRightIcon,
+    ArrowUpIcon,
     LoadingIcon,
     LoadingIconLarge,
     GitHubIcon,
@@ -57,6 +58,7 @@ export default function Client({ title }: any) {
     const [isLoading, setIsLoading] = useState(false)
     const [hasMD, setHasMD] = useState("")
     const [isListView, setIsListView] = useState(false)
+    const [activeSort, setSort] = useState("type")
 
     async function fetchRootContents() {
         const response = await fetch(`/api/listContents?dir=`)
@@ -73,7 +75,7 @@ export default function Client({ title }: any) {
         const response = await fetch(`/api/listContents?dir=${encodeURIComponent(currentPath)}`)
         const json = await response.json()
         cache[currentPath] = json
-        setDirItems(json)
+        sortDir(activeSort, json)
         const mdFile = json.find((item: any) => item.basename.endsWith('.md'))
         if (mdFile) {
             setHasMD(mdFile.filename)
@@ -84,7 +86,7 @@ export default function Client({ title }: any) {
     useEffect(() => {
         if (cache[currentPath]) {
             setHasMD("")
-            setDirItems(cache[currentPath])
+            sortDir(activeSort, cache[currentPath])
             const mdFile = cache[currentPath].find((item: any) => item.basename.endsWith('.md'))
             if (mdFile) {
                 setHasMD(mdFile.filename)
@@ -98,6 +100,9 @@ export default function Client({ title }: any) {
         const savedState = localStorage.getItem('isListView')
         setIsListView(savedState !== null ? JSON.parse(savedState) : false)
 
+        const savedSort = localStorage.getItem('sort')
+        setSort(savedSort !== null ? savedSort : 'type')
+
         const handlePopState = (event?: PopStateEvent) => {
             setCurrentPath(window.location.pathname === '/' ? '' : decodeURIComponent(window.location.pathname))
         }
@@ -110,7 +115,29 @@ export default function Client({ title }: any) {
 
     function handleListView(value: any) {
         setIsListView(value);
-        localStorage.setItem('isListView', JSON.stringify(value));
+        localStorage.setItem('isListView', JSON.stringify(value))
+    }
+
+    function sortDir(sort: any, items: any) {
+        if (sort === "type") {
+            setDirItems(items.sort((a: any, b: any) => a.type.localeCompare(b.type)))
+        } else if (sort === "type reverse") {
+            setDirItems(items.sort((a: any, b: any) => b.type.localeCompare(a.type)))
+        } else if (sort === "name alpha") {
+            setDirItems(items.sort((a: any, b: any) => a.basename.localeCompare(b.basename)))
+        } else if (sort === "name reverse") {
+            setDirItems(items.sort((a: any, b: any) => b.basename.localeCompare(a.basename)))
+        } else if (sort === "date new to old") {
+            setDirItems(items.sort((a: any, b: any) => new Date(b.lastmod).getTime() - new Date(a.lastmod).getTime()))
+        } else if (sort === "date old to new") {
+            setDirItems(items.sort((a: any, b: any) => new Date(a.lastmod).getTime() - new Date(b.lastmod).getTime()))
+        }
+    }
+
+    function handleSetSort(value: any) {
+        setSort(value)
+        localStorage.setItem('sort', value)
+        sortDir(value, dirItems)
     }
 
     function setNewPath(_path: any) {
@@ -168,7 +195,34 @@ export default function Client({ title }: any) {
                         />
 
                     </div>
+
                     <div className="flex items-center gap-4">
+                        <Button
+                            className={activeSort.startsWith("type") ? "bg-gray-200 dark:bg-gray-800" : "hover:bg-gray-200 dark:hover:bg-gray-800"}
+                            onClick={() => handleSetSort(activeSort === "type" ? "type reverse" : "type")}
+                        >
+                            Type&nbsp;
+                            {activeSort === "type" && <ArrowUpIcon className="h-3 w-3" /> || activeSort === "type reverse" && <ArrowDownIcon className="h-3 w-3" />}
+                        </Button>
+
+                        <Button
+                            className={activeSort.startsWith("name") ? "bg-gray-200 dark:bg-gray-800" : "hover:bg-gray-200 dark:hover:bg-gray-800"}
+                            onClick={() => handleSetSort(activeSort === "name alpha" ? "name reverse" : "name alpha")}
+                        >
+                            Name&nbsp;
+                            {activeSort === "name alpha" && <ArrowUpIcon className="h-3 w-3" /> || activeSort === "name reverse" && <ArrowDownIcon className="h-3 w-3" />}
+                        </Button>
+
+                        <Button
+                            className={activeSort.startsWith("date") ? "bg-gray-200 dark:bg-gray-800" : "hover:bg-gray-200 dark:hover:bg-gray-800"}
+                            onClick={() => handleSetSort(activeSort === "date new to old" ? "date old to new" : "date new to old")}
+                        >
+                            Modified&nbsp;
+                            {activeSort === "date new to old" && <ArrowDownIcon className="h-3 w-3" /> || activeSort === "date old to new" && <ArrowUpIcon className="h-3 w-3" />}
+                        </Button>
+
+                        <Separator orientation="vertical" />
+
                         <Button
                             size="icon"
                             className={isListView ? "bg-gray-200 dark:bg-gray-800" : "hover:bg-gray-200 dark:hover:bg-gray-800"}
@@ -436,7 +490,7 @@ function UpdateBreadcrumb({ path = "", onChange }: any) {
                         <DropdownMenu>
                             <DropdownMenuTrigger className="flex items-center gap-1 truncate">
                                 {secondLastPath}
-                                <ChevronDown className="h-4 w-4" />
+                                <ArrowDownIcon className="h-4 w-4" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="bg-white dark:bg-black dark:border-gray-700">
 

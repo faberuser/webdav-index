@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { ToastAction } from "@/components/ui/toast"
+import { Separator } from "@/components/ui/separator"
 import {
     Tooltip,
     TooltipContent,
@@ -106,6 +107,26 @@ function DisplayIcon({ icon }: any) {
 function DisplaySize({ dir }: any) {
     return (
         dir.size < 1024 ? `${dir.size} B` : dir.size / 1024 < 1024 ? `${(dir.size / 1024).toFixed(2)} KB` : dir.size / 1024 / 1024 < 1024 ? `${(dir.size / 1024 / 1024).toFixed(2)} MB` : `${(dir.size / 1024 / 1024 / 1024).toFixed(2)} GB`
+    )
+}
+
+
+function DisplayLastModified({ dir }: any) {
+    const date = new Date(dir.lastmod)
+
+    const formattedDate = date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+    })
+
+    return (
+        <span className="text-sm font-small">
+            {formattedDate.replace(',', '')}
+        </span>
     )
 }
 
@@ -204,6 +225,9 @@ export function DisplayDir({ dir, onChange, fetchQueue, listView }: any) {
 
                             <div className="flex-1">
                                 <div className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{dir.basename}</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <DisplayLastModified dir={dir} />
                             </div>
                         </div>
                     </TooltipTrigger>
@@ -326,6 +350,8 @@ export function DisplayImage({ dir, fetchQueue, listView }: any) {
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
+                            <DisplayLastModified dir={dir} />
+                            <Separator orientation="vertical" />
                             <DisplayDownloadButton dir={dir} listView={true} />
                         </div>
                     </div>
@@ -432,6 +458,8 @@ export function DisplayVideo({ dir, listView }: any) {
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
+                            <DisplayLastModified dir={dir} />
+                            <Separator orientation="vertical" />
                             <DisplayDownloadButton dir={dir} listView={true} />
                         </div>
                     </div>
@@ -510,6 +538,8 @@ export function DisplayTextFile({ dir, listView }: any) {
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
+                            <DisplayLastModified dir={dir} />
+                            <Separator orientation="vertical" />
                             <DisplayDownloadButton dir={dir} listView={true} />
                         </div>
                     </div>
@@ -614,6 +644,8 @@ export function DisplayFile({ dir, listView }: any) {
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
+                            <DisplayLastModified dir={dir} />
+                            <Separator orientation="vertical" />
                             <DisplayDownloadButton dir={dir} listView={true} />
                         </div>
                     </div>

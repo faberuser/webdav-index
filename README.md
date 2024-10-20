@@ -55,6 +55,6 @@ npm run start
 - [x] Preview .md in path and other text files
 - [x] Back/Forward
 - [x] List view
-- [ ] Sort by name, last modified
+- [x] Sort by file/name/last modified
 - [ ] Search
 - [ ] Share with path/location
