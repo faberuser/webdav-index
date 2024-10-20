@@ -350,7 +350,7 @@ export function DisplayImage({ dir, fetchQueue, listView }: any) {
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <DisplayLastModified dir={dir} />
+                            <DisplayLastModified dir={dir} />&nbsp;
                             <Separator orientation="vertical" />
                             <DisplayDownloadButton dir={dir} listView={true} />
                         </div>
@@ -458,7 +458,7 @@ export function DisplayVideo({ dir, listView }: any) {
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <DisplayLastModified dir={dir} />
+                            <DisplayLastModified dir={dir} />&nbsp;
                             <Separator orientation="vertical" />
                             <DisplayDownloadButton dir={dir} listView={true} />
                         </div>
@@ -538,7 +538,7 @@ export function DisplayTextFile({ dir, listView }: any) {
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <DisplayLastModified dir={dir} />
+                            <DisplayLastModified dir={dir} />&nbsp;
                             <Separator orientation="vertical" />
                             <DisplayDownloadButton dir={dir} listView={true} />
                         </div>
@@ -644,7 +644,7 @@ export function DisplayFile({ dir, listView }: any) {
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <DisplayLastModified dir={dir} />
+                            <DisplayLastModified dir={dir} />&nbsp;
                             <Separator orientation="vertical" />
                             <DisplayDownloadButton dir={dir} listView={true} />
                         </div>
