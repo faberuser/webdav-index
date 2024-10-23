@@ -166,3 +166,20 @@ export async function getVideoThumbnail(filename: string) {
 
     return videoContent
 }
+
+export async function search(query: string) {
+    const dirContents = await getContentsCache()
+
+    const search = dirContents
+        .filter((item: any) => {
+            return item.basename.toLowerCase().includes(query.toLowerCase())
+        })
+        .map((item: any) => {
+            return {
+                ...item,
+                filename: item.filename.replace(root_dir, '')
+            }
+        })
+
+    return search
+}

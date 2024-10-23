@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import RenderIfVisible from '@/components/RenderIfVisible'
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { ModeToggle } from "@/components/toggleMode"
-import { Separator } from "@/components/ui/separator"
 import {
     FolderIcon,
     MenuIcon,
@@ -45,20 +45,46 @@ import {
     DisplayText,
     DisplayVideo,
 } from "@/components/dirItems"
+import {
+    NavigationMenu,
+    NavigationMenuContent,
+    NavigationMenuItem,
+    NavigationMenuList,
+    NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+    Command,
+    CommandGroup,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
+} from "@/components/ui/command"
 
 
 const cache: any = {}
 let fetchQueue: any = []
+const INITIAL_DISPLAY_LIMIT = 50
 
 
 export default function Client({ title }: any) {
+    const [isLoading, setIsLoading] = useState(false)
+    const [currentPath, setCurrentPath] = useState("")
     const [rootDirItems, setRootDirItems] = useState([])
     const [dirItems, setDirItems] = useState([])
-    const [currentPath, setCurrentPath] = useState("")
-    const [isLoading, setIsLoading] = useState(false)
+    const [searchResults, setSearchResults] = useState([])
     const [hasMD, setHasMD] = useState("")
     const [isListView, setIsListView] = useState(false)
     const [activeSort, setSort] = useState("type")
+    const [displayLimit, setDisplayLimit] = useState(INITIAL_DISPLAY_LIMIT)
+    const [inputValue, setInputValue] = useState('')
 
     async function fetchRootContents() {
         const response = await fetch(`/api/listContents?dir=`)
@@ -114,7 +140,7 @@ export default function Client({ title }: any) {
     }, [])
 
     function handleListView(value: any) {
-        setIsListView(value);
+        setIsListView(value)
         localStorage.setItem('isListView', JSON.stringify(value))
     }
 
@@ -152,6 +178,48 @@ export default function Client({ title }: any) {
         window.history.pushState(null, "", _path)
     }
 
+    function debounce(func: any, delay: any) {
+        let timeoutId: any
+        return function (this: any, ...args: any) {
+            clearTimeout(timeoutId)
+            timeoutId = setTimeout(() => {
+                func.apply(this, args)
+            }, delay)
+        }
+    }
+
+    const performSearch = async (query: any) => {
+        console.log(query)
+        if (query === "") {
+            setSearchResults([])
+            return
+        }
+        setIsLoading(true)
+        const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`)
+        const json = await response.json()
+        setSearchResults(json)
+        setIsLoading(false)
+    }
+
+    const debouncedSearch = useCallback(debounce((query: string) => performSearch(query), 500), [])
+
+    const handleInputChange = (event: any) => {
+        setInputValue(event.target.value)
+        debouncedSearch(event.target.value)
+    }
+
+    function getPathToFile(filePath: string): string {
+        const lastSlashIndex = filePath.lastIndexOf('/')
+        if (lastSlashIndex !== -1) {
+            return filePath.substring(0, lastSlashIndex)
+        }
+        return filePath
+    }
+
+    const loadMoreResults = () => {
+        setDisplayLimit(displayLimit + INITIAL_DISPLAY_LIMIT)
+    }
+
     return (
         <div className="flex h-screen w-full">
             {isLoading && (
@@ -184,44 +252,143 @@ export default function Client({ title }: any) {
             <div className="flex flex-col h-screen w-full">
                 <div className="flex h-14 items-center justify-between border-b dark:border-gray-600 p-6">
                     <div className="flex items-center gap-4">
-
                         <Button variant="ghost" size="icon" className="lg:hidden">
                             <MenuIcon className="h-6 w-6" />
                         </Button>
-
                         <UpdateBreadcrumb
                             path={currentPath}
                             onChange={(_path: any) => setNewPath(_path)}
                         />
-
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <Button
-                            className={activeSort.startsWith("type") ? "bg-gray-200 dark:bg-gray-800" : "hover:bg-gray-200 dark:hover:bg-gray-800"}
-                            onClick={() => handleSetSort(activeSort === "type" ? "type reverse" : "type")}
-                        >
-                            Type&nbsp;
-                            {activeSort === "type" && <ArrowUpIcon className="h-3 w-3" /> || activeSort === "type reverse" && <ArrowDownIcon className="h-3 w-3" />}
-                        </Button>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button className="items-center gap-2 whitespace-nowrap border border-gray-300 dark:border-gray-500 px-4 py-2 h-8 justify-start rounded-[0.5rem] bg-muted/50 text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64">
+                                    <span>Search...</span>
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="p-0 bg-white dark:bg-black border border-gray-300 dark:border-gray-500">
+                                <DialogHeader className="hidden">
+                                    <DialogTitle>Search Dialog</DialogTitle>
+                                    <DialogDescription>Search Dialog</DialogDescription>
+                                </DialogHeader>
 
-                        <Button
-                            className={activeSort.startsWith("name") ? "bg-gray-200 dark:bg-gray-800" : "hover:bg-gray-200 dark:hover:bg-gray-800"}
-                            onClick={() => handleSetSort(activeSort === "name alpha" ? "name reverse" : "name alpha")}
-                        >
-                            Name&nbsp;
-                            {activeSort === "name alpha" && <ArrowUpIcon className="h-3 w-3" /> || activeSort === "name reverse" && <ArrowDownIcon className="h-3 w-3" />}
-                        </Button>
+                                <Command className="rounded-lg border shadow-md md:min-w-[450px]">
+                                    <Input placeholder="Search..." onInput={handleInputChange} />
+                                    <CommandList className="ctscroll">
+                                        {isLoading && (
+                                            <CommandGroup>
+                                                <CommandItem className="p-5 justify-center">
+                                                    <LoadingIcon />
+                                                </CommandItem>
+                                            </CommandGroup>
+                                        )}
 
-                        <Button
-                            className={activeSort.startsWith("date") ? "bg-gray-200 dark:bg-gray-800" : "hover:bg-gray-200 dark:hover:bg-gray-800"}
-                            onClick={() => handleSetSort(activeSort === "date new to old" ? "date old to new" : "date new to old")}
-                        >
-                            Modified&nbsp;
-                            {activeSort === "date new to old" && <ArrowDownIcon className="h-3 w-3" /> || activeSort === "date old to new" && <ArrowUpIcon className="h-3 w-3" />}
-                        </Button>
+                                        {inputValue && searchResults.length === 0 && !isLoading && (
+                                            <CommandGroup>
+                                                <CommandItem className="p-5 justify-center">
+                                                    <span>No results found</span>
+                                                </CommandItem>
+                                            </CommandGroup>
+                                        )}
 
-                        <Separator orientation="vertical" />
+                                        {searchResults.some((result: any) => result.type === "file") && (
+                                            <CommandGroup heading="Files">
+                                                {searchResults.slice(0, displayLimit).map((result: any) => (
+                                                    result.type === "file" && (
+                                                        <CommandItem key={result.etag + result.basename} className="p-0">
+                                                            <TooltipProvider>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild className="w-full">
+                                                                        <Button onClick={() => setNewPath(getPathToFile(result.filename))} className="w-full justify-start hover:bg-gray-200 dark:hover:bg-gray-800">
+                                                                            <span className="truncate">{result.basename}</span>
+                                                                        </Button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent className="bg-white dark:bg-black border border-gray-300 dark:border-gray-500">
+                                                                        <p>{result.basename}</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+                                                        </CommandItem>
+                                                    )
+                                                ))}
+                                            </CommandGroup>
+                                        )}
+
+                                        <CommandSeparator />
+
+                                        {searchResults.some((result: any) => result.type === "directory") && (
+                                            <CommandGroup heading="Directories">
+                                                {searchResults.slice(0, displayLimit).map((result: any) => (
+                                                    result.type === "directory" && (
+                                                        <CommandItem key={result.etag + result.basename} className="p-0">
+                                                            <TooltipProvider>
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild className="w-full">
+                                                                        <Button onClick={() => setNewPath(result.filename)} className="w-full justify-start hover:bg-gray-200 dark:hover:bg-gray-800">
+                                                                            <span className="truncate">{result.basename}</span>
+                                                                        </Button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent className="bg-white dark:bg-black border border-gray-300 dark:border-gray-500">
+                                                                        <p>{result.basename}</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+                                                        </CommandItem>
+                                                    )
+                                                ))}
+                                            </CommandGroup>
+                                        )}
+
+                                        <CommandSeparator />
+
+                                        {searchResults.length > displayLimit && (
+                                            <CommandGroup>
+                                                <CommandItem className="p-0">
+                                                    <Button className="w-full justify-center hover:bg-gray-200 dark:hover:bg-gray-800" onClick={loadMoreResults}>Load More</Button>
+                                                </CommandItem>
+                                            </CommandGroup>
+                                        )}
+                                    </CommandList>
+                                </Command>
+                            </DialogContent>
+                        </Dialog>
+
+                        <NavigationMenu>
+                            <NavigationMenuList>
+                                <NavigationMenuItem>
+                                    <NavigationMenuTrigger className="hover:bg-gray-200 dark:hover:bg-gray-800">
+                                        Sort
+                                    </NavigationMenuTrigger>
+                                    <NavigationMenuContent className="flex flex-col gap-2 p-2 bg-white dark:bg-black">
+                                        <Button
+                                            className={activeSort.startsWith("type") ? "w-full bg-gray-200 dark:bg-gray-800" : "w-full hover:bg-gray-200 dark:hover:bg-gray-800"}
+                                            onClick={() => handleSetSort(activeSort === "type" ? "type reverse" : "type")}
+                                        >
+                                            Type&nbsp;
+                                            {activeSort === "type" && <ArrowUpIcon className="h-3 w-3" /> || activeSort === "type reverse" && <ArrowDownIcon className="h-3 w-3" />}
+                                        </Button>
+
+                                        <Button
+                                            className={activeSort.startsWith("name") ? "w-full bg-gray-200 dark:bg-gray-800" : "w-full hover:bg-gray-200 dark:hover:bg-gray-800"}
+                                            onClick={() => handleSetSort(activeSort === "name alpha" ? "name reverse" : "name alpha")}
+                                        >
+                                            Name&nbsp;
+                                            {activeSort === "name alpha" && <ArrowUpIcon className="h-3 w-3" /> || activeSort === "name reverse" && <ArrowDownIcon className="h-3 w-3" />}
+                                        </Button>
+
+                                        <Button
+                                            className={activeSort.startsWith("date") ? "w-full bg-gray-200 dark:bg-gray-800" : "w-full hover:bg-gray-200 dark:hover:bg-gray-800"}
+                                            onClick={() => handleSetSort(activeSort === "date new to old" ? "date old to new" : "date new to old")}
+                                        >
+                                            Modified&nbsp;
+                                            {activeSort === "date new to old" && <ArrowDownIcon className="h-3 w-3" /> || activeSort === "date old to new" && <ArrowUpIcon className="h-3 w-3" />}
+                                        </Button>
+                                    </NavigationMenuContent>
+                                </NavigationMenuItem>
+                            </NavigationMenuList>
+                        </NavigationMenu>
 
                         <Button
                             size="icon"
@@ -230,12 +397,14 @@ export default function Client({ title }: any) {
                         >
                             <ListIcon className="h-[1.2rem] w-[1.2rem]" />
                         </Button>
+
                         <a target="_blank" rel="noreferrer" href="https://github.com/faberuser/webdav-index">
                             <Button size="icon" className="hover:bg-gray-200 dark:hover:bg-gray-800">
                                 <GitHubIcon className="h-[1.2rem] w-[1.2rem]" />
                                 <span className="sr-only">GitHub</span>
                             </Button>
                         </a>
+
                         <ModeToggle />
                     </div>
                 </div>
