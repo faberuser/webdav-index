@@ -45,9 +45,9 @@ npm run start
 
 ## Screenshots
 
-![webdav-index-0](https://github.com/user-attachments/assets/fabe8c2b-5c0e-49fe-af31-899bde83d155)
+![webdav-index-0](https://github.com/user-attachments/assets/53ec1b9b-15c7-4ce8-a6f9-7b97068d7763)
 
-![webdav-index-1](https://github.com/user-attachments/assets/a2581389-acab-4cf0-8190-04685712de3c)
+![webdav-index-1](https://github.com/user-attachments/assets/ec2f99b3-5e01-41ce-9ce3-321c012d44c4)
 
 ### Todo
 
