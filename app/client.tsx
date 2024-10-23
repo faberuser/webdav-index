@@ -102,7 +102,7 @@ export default function Client({ title }: any) {
         const json = await response.json()
         cache[currentPath] = json
         sortDir(activeSort, json)
-        const mdFile = json.find((item: any) => item.basename.endsWith('.md'))
+        const mdFile = json.find((item: any) => item.basename.toLowerCase().endsWith('.md'))
         if (mdFile) {
             setHasMD(mdFile.filename)
         }
@@ -113,7 +113,7 @@ export default function Client({ title }: any) {
         if (cache[currentPath]) {
             setHasMD("")
             sortDir(activeSort, cache[currentPath])
-            const mdFile = cache[currentPath].find((item: any) => item.basename.endsWith('.md'))
+            const mdFile = cache[currentPath].find((item: any) => item.basename.toLowerCase().endsWith('.md'))
             if (mdFile) {
                 setHasMD(mdFile.filename)
             }
@@ -564,7 +564,7 @@ function AccessDir({ items, onChange, listView }: any) {
         items.map((dir: any) => {
             const Component = dir.type === 'directory'
                 ? DisplayDir
-                : fileExtensionToComponent[getFileExtension(dir.basename)] || DisplayFile
+                : fileExtensionToComponent[getFileExtension(dir.basename.toLowerCase())] || DisplayFile
 
             return (
                 <RenderIfVisible key={dir.etag} stayRendered={true}>

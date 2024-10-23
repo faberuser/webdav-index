@@ -631,7 +631,8 @@ export function DisplayFile({ dir, listView }: any) {
                 <HoverCardTrigger asChild className="h-full w-full">
                     <div className="flex items-center gap-4 p-3 rounded-md shadow-sm transition-all border border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 text-gray-500 dark:text-gray-400"
                         style={{ cursor: 'pointer' }}>
-                        {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
+                        {dir.basename.toLowerCase().endsWith('.zip') || dir.basename.toLowerCase().endsWith('.rar')
+                            || dir.basename.toLowerCase().endsWith('.7z') || dir.basename.toLowerCase().endsWith('.tar') ?
                             <ZipIcon className="h-8 w-8" />
                             :
                             <FileIcon className="h-8 w-8" />
@@ -668,7 +669,8 @@ export function DisplayFile({ dir, listView }: any) {
                 <HoverCardTrigger asChild className="h-full w-full">
                     <div className={cardClass("")}>
                         <DisplayDownloadButton dir={dir} listView={false} />
-                        {dir.basename.endsWith('.zip') || dir.basename.endsWith('.rar') || dir.basename.endsWith('.7z') || dir.basename.endsWith('.tar') ?
+                        {dir.basename.toLowerCase().endsWith('.zip') || dir.basename.toLowerCase().endsWith('.rar')
+                            || dir.basename.toLowerCase().endsWith('.7z') || dir.basename.toLowerCase().endsWith('.tar') ?
                             <DisplayIcon icon={<ZipIcon className="h-12 w-12" />} />
                             :
                             <DisplayIcon icon={<FileIcon className="h-12 w-12" />} />
