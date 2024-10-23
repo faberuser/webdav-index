@@ -56,5 +56,5 @@ npm run start
 - [x] Back/Forward
 - [x] List view
 - [x] Sort by file/name/last modified
-- [ ] Search
-- [ ] Share with path/location
+- [x] Search
+- [x] Share with path/location
