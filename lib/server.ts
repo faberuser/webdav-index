@@ -1,9 +1,9 @@
-import { root_dir, remoteURL, username, password } from "@/config"
+import { root_dir, remoteURL, username, password, fuzzy } from "@/config"
 import { createClient } from "webdav"
 import NodeCache from 'node-cache'
 import https from 'https'
-import sharp from "sharp";
-
+import sharp from "sharp"
+const fuzz = require('fuzzball')
 
 const contentsCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 })
 const agent = new https.Agent({ rejectUnauthorized: false })
@@ -170,16 +170,29 @@ export async function getVideoThumbnail(filename: string) {
 export async function search(query: string) {
     const dirContents = await getContentsCache()
 
-    const search = dirContents
-        .filter((item: any) => {
-            return item.basename.toLowerCase().includes(query.toLowerCase())
-        })
-        .map((item: any) => {
-            return {
-                ...item,
-                filename: item.filename.replace(root_dir, '')
-            }
-        })
-
-    return search
+    if (fuzzy) {
+        const basenames = dirContents.map((item: any) => item.basename)
+        return fuzz.extract(query, basenames, { scorer: fuzz.token_set_ratio })
+            .filter((item: any) => item[1] >= 80)
+            .map((item: any) => {
+                return dirContents.find((element: any) => element.basename === item[0])
+            })
+            .map((item: any) => {
+                return {
+                    ...item,
+                    filename: item.filename.replace(root_dir, '')
+                }
+            })
+    } else {
+        return dirContents
+            .filter((item: any) => {
+                return item.basename.toLowerCase().includes(query.toLowerCase())
+            })
+            .map((item: any) => {
+                return {
+                    ...item,
+                    filename: item.filename.replace(root_dir, '')
+                }
+            })
+    }
 }
