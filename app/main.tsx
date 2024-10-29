@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 
 import RootLayout from '@/app/layout'
-import { title } from '@/config'
+import { title, description } from '@/config'
 
 const Client = dynamic(() => import('@/app/client'))
 
@@ -23,7 +23,7 @@ export const Main = () => (
         <Head>
             <title>{title}</title>
             <meta name="title" property="og:title" content={title} key="title" />
-            <meta name="description" property="og:description" content={"Interface Indexer for " + title} key="description" />
+            <meta name="description" property="og:description" content={description} key="description" />
         </Head>
         <style jsx global>
             {`html {
