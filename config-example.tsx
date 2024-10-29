@@ -4,3 +4,4 @@ export const username = "whoami"
 export const password = undefined
 export const title = "Some Cool Title"
 export const fuzzy = true // fuzzy search
+export const cacheRefresh = 3600 // server's cache refresh time in seconds
