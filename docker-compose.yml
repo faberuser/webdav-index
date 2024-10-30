@@ -1,0 +1,18 @@
+services:
+  app:
+    container_name: webdav-index
+    image: webdav-index
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      - root_dir="/path/to/directory"
+      - remoteURL="https://somecoolurl.com"
+      - username="whoami"
+      - password=undefine
+      - title="Some Cool Title"
+      - description="Indexer for Some Cool Title"
+      - fuzzy=true
+      - cacheRefresh=3600
