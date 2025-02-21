@@ -6,15 +6,13 @@ services:
             dockerfile: Dockerfile
         environment:
             - REMOTE_URL=${REMOTE_URL}
-            - REMOTE_USERNAME=${REMOTE_USERNAME}
-            - REMOTE_PASSWORD=${REMOTE_PASSWORD}
-            - REMOTE_ROOT_DIR=${REMOTE_ROOT_DIR}
-
-            - FUZZY_SEARCH=${FUZZY_SEARCH}
-            - CACHE_REFRESH=${CACHE_REFRESH}
-
-            - NEXT_PUBLIC_TITLE=${NEXT_PUBLIC_TITLE}
-            - NEXT_PUBLIC_DESCRIPTION=${NEXT_PUBLIC_DESCRIPTION}
+            - REMOTE_USERNAME=${REMOTE_USERNAME:-""}
+            - REMOTE_PASSWORD=${REMOTE_PASSWORD:-""}
+            - REMOTE_ROOT_DIR=${REMOTE_ROOT_DIR:-""}
+            - NEXT_PUBLIC_TITLE=${NEXT_PUBLIC_TITLE:-"Some Cool Title"}
+            - NEXT_PUBLIC_DESCRIPTION=${NEXT_PUBLIC_DESCRIPTION:-"Indexer for Some Cool Title"}
+            - FUZZY_SEARCH=${FUZZY_SEARCH:-true}
+            - CACHE_REFRESH=${CACHE_REFRESH:-3600}
         ports:
-            - ${DOCKER_PORT}:3000
+            - ${DOCKER_PORT:-3000}:3000
         restart: unless-stopped

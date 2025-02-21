@@ -9,8 +9,9 @@ import { Toaster } from "@/components/ui/toaster"
 
 import RootLayout from "@/app/layout"
 
-const title = process.env.NEXT_PUBLIC_TITLE
-const description = process.env.NEXT_PUBLIC_DESCRIPTION
+const title = process.env.NEXT_PUBLIC_TITLE || "Some Cool Title"
+const description =
+    process.env.NEXT_PUBLIC_DESCRIPTION || "Indexer for Some Cool Title"
 
 const Client = dynamic(() => import("@/app/client"))
 

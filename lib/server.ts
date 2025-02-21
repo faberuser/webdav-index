@@ -1,26 +1,7 @@
-// verify env
-const envs = [
-    "REMOTE_URL",
-    "REMOTE_USERNAME",
-    "REMOTE_PASSWORD",
-    "REMOTE_ROOT_DIR",
-    "FUZZY_SEARCH",
-    "CACHE_REFRESH",
-    "NEXT_PUBLIC_TITLE",
-    "NEXT_PUBLIC_DESCRIPTION",
-]
-
-envs.forEach((env) => {
-    if (!process.env[env]) {
-        if (env === "REMOTE_ROOT_DIR") {
-            process.env[env] = ""
-        } else if (env === "REMOTE_PASSWORD") {
-            process.env[env] = undefined
-        } else {
-            throw new Error(`Environment variable ${env} is missing`)
-        }
-    }
-})
+if (!process.env.REMOTE_URL) {
+    console.error("REMOTE_URL is not set")
+    process.exit(1)
+}
 
 import { createClient } from "webdav"
 import NodeCache from "node-cache"
@@ -28,20 +9,18 @@ import https from "https"
 import sharp from "sharp"
 const fuzz = require("fuzzball")
 
-const root_dir = process.env.REMOTE_ROOT_DIR as string
+const root_dir = process.env.REMOTE_ROOT_DIR || ""
 
 const contentsCache = new NodeCache({
-    stdTTL: process.env.CACHE_REFRESH
-        ? parseInt(process.env.CACHE_REFRESH)
-        : 3600,
+    stdTTL: parseInt(process.env.CACHE_REFRESH || "3600"),
     checkperiod: 120,
 })
 
 const agent = new https.Agent({ rejectUnauthorized: false })
 
-const client = createClient(process.env.REMOTE_URL as string, {
-    username: process.env.REMOTE_USERNAME,
-    password: process.env.REMOTE_PASSWORD,
+const client = createClient(process.env.REMOTE_URL, {
+    username: process.env.REMOTE_USERNAME || "",
+    password: process.env.REMOTE_PASSWORD || "",
     httpsAgent: agent,
     withCredentials: true,
 })
@@ -64,14 +43,12 @@ function generateRandomString(length: number, parts: number) {
 
 export async function getContentsCache() {
     let dirContents: any = contentsCache.get("contents")
-
     if (!dirContents) {
         dirContents = await client.getDirectoryContents(root_dir, {
             deep: true,
         })
         contentsCache.set("contents", dirContents)
     }
-
     return dirContents
 }
 
@@ -202,16 +179,14 @@ export async function getVideoThumbnail(filename: string) {
     const videoStream = client.createReadStream(root_dir + filename, {
         range: { start: 0, end: 1 },
     })
-
     const videoContent = await streamToBuffer(videoStream)
-
     return videoContent
 }
 
 export async function search(query: string) {
     const dirContents = await getContentsCache()
 
-    if (process.env.FUZZY === "true") {
+    if (process.env.FUZZY_SEARCH === "true") {
         const basenames = dirContents.map((item: any) => item.basename)
         return fuzz
             .extract(query, basenames, { scorer: fuzz.token_set_ratio })
