@@ -19,8 +19,8 @@ const contentsCache = new NodeCache({
 const agent = new https.Agent({ rejectUnauthorized: false })
 
 const client = createClient(process.env.REMOTE_URL, {
-    username: process.env.REMOTE_USERNAME || "",
-    password: process.env.REMOTE_PASSWORD || "",
+    username: process.env.REMOTE_USERNAME || undefined,
+    password: process.env.REMOTE_PASSWORD || undefined,
     httpsAgent: agent,
     withCredentials: true,
 })
