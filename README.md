@@ -41,7 +41,7 @@ npm run build
 Start
 
 ```bash
-npm run start
+npx next start -p 3000 -H 0.0.0.0
 ```
 
 ## Docker
@@ -57,6 +57,7 @@ title = "Some Cool Title"
 description = "Indexer for Some Cool Title"
 fuzzy = true
 cacheRefresh = 3600
+port = 3000
 ```
 
 Build

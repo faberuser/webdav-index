@@ -15,4 +15,4 @@ services:
                 fuzzy: ${FUZZY:-true}
                 cacheRefresh: ${CACHE_REFRESH:-3600}
         ports:
-            - 3000:3000
+            - ${PORT:-3000}:3000
