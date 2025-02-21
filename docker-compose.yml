@@ -12,7 +12,17 @@ services:
                 title: ${TITLE}
                 description: ${DESCRIPTION}
                 fuzzy: ${FUZZY:-true}
-                cacheRefresh: ${CACHE_REFRESH:-3600}
+                cacheRefresh: ${CACHEREFRESH:-3600}
+        environment:
+            - ROOT_DIR=${ROOT_DIR}
+            - REMOTEURL=${REMOTEURL}
+            - USERNAME=${USERNAME}
+            - PASSWORD=${PASSWORD}
+            - TITLE=${TITLE}
+            - DESCRIPTION=${DESCRIPTION}
+            - FUZZY=${FUZZY:-true}
+            - CACHE_REFRESH=${CACHEREFRESH:-3600}
+            - PORT=${PORT:-3000}
         ports:
             - ${PORT:-3000}:3000
         restart: unless-stopped
