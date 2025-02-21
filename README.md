@@ -1,4 +1,5 @@
 # webdav-index
+
 Interface Indexer for WebDav
 
 ## Config
@@ -32,13 +33,42 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Deploying
 
 Build
+
 ```bash
 npm run build
 ```
 
 Start
+
 ```bash
 npm run start
+```
+
+## Docker
+
+Create `.env` with these fields:
+
+```bash
+root_dir = "/path/to/directory"
+remoteURL = "https://somecoolurl.com"
+username = "whoami"
+password = ""
+title = "Some Cool Title"
+description = "Indexer for Some Cool Title"
+fuzzy = true
+cacheRefresh = 3600
+```
+
+Build
+
+```bash
+docker-compose build
+```
+
+Start
+
+```bash
+docker-compose up
 ```
 
 ## Screenshots

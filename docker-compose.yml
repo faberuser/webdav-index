@@ -1,18 +1,18 @@
 services:
-  app:
-    container_name: webdav-index
-    image: webdav-index
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 3000:3000
-    environment:
-      - root_dir="/path/to/directory"
-      - remoteURL="https://somecoolurl.com"
-      - username="whoami"
-      - password=undefine
-      - title="Some Cool Title"
-      - description="Indexer for Some Cool Title"
-      - fuzzy=true
-      - cacheRefresh=3600
+    app:
+        container_name: webdav-index
+        image: webdav-index
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                root_dir: ${ROOT_DIR}
+                remoteURL: ${REMOTEURL}
+                username: ${USERNAME}
+                password: ${PASSWORD}
+                title: ${TITLE}
+                description: ${DESCRIPTION}
+                fuzzy: ${FUZZY:-true}
+                cacheRefresh: ${CACHE_REFRESH:-3600}
+        ports:
+            - 3000:3000

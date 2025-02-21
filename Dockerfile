@@ -14,11 +14,14 @@ WORKDIR /app
 COPY . /app
 
 # Generate config.tsx file
-RUN /bin/sh -c "echo '' > /app/config.tsx && \
-    for VAR in \$(printenv | grep 'REACT_APP_' | cut -d= -f1); do \
-    VALUE=\${\$VAR}; \
-    echo 'export const \$VAR = '\''\$VALUE'\'';' >> /app/config.tsx; \
-    done"
+RUN echo 'export const root_dir = "'"$root_dir"'";' > /app/config.tsx && \
+    echo 'export const remoteURL = "'"$remoteURL"'";' >> /app/config.tsx && \
+    echo 'export const username = "'"$username"'";' >> /app/config.tsx && \
+    echo 'export const password = "'"$password"'";' >> /app/config.tsx && \
+    echo 'export const title = "'"$title"'";' >> /app/config.tsx && \
+    echo 'export const description = "'"$description"'";' >> /app/config.tsx && \
+    echo 'export const fuzzy = '"$fuzzy"';' >> /app/config.tsx && \
+    echo 'export const cacheRefresh = '"$cacheRefresh"';' >> /app/config.tsx
 
 # Install dependencies
 RUN npm install
