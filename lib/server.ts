@@ -1,23 +1,47 @@
-import {
-    root_dir,
-    remoteURL,
-    username,
-    password,
-    fuzzy,
-    cacheRefresh,
-} from "@/config"
+// verify env
+const envs = [
+    "REMOTE_URL",
+    "REMOTE_USERNAME",
+    "REMOTE_PASSWORD",
+    "REMOTE_ROOT_DIR",
+    "FUZZY_SEARCH",
+    "CACHE_REFRESH",
+    "NEXT_PUBLIC_TITLE",
+    "NEXT_PUBLIC_DESCRIPTION",
+]
+
+envs.forEach((env) => {
+    if (!process.env[env]) {
+        if (env === "REMOTE_ROOT_DIR") {
+            process.env[env] = ""
+        } else if (env === "REMOTE_PASSWORD") {
+            process.env[env] = undefined
+        } else {
+            throw new Error(`Environment variable ${env} is missing`)
+        }
+    }
+})
+
 import { createClient } from "webdav"
 import NodeCache from "node-cache"
 import https from "https"
 import sharp from "sharp"
 const fuzz = require("fuzzball")
 
-const contentsCache = new NodeCache({ stdTTL: cacheRefresh, checkperiod: 120 })
+const root_dir = process.env.REMOTE_ROOT_DIR as string
+
+const contentsCache = new NodeCache({
+    stdTTL: process.env.CACHE_REFRESH
+        ? parseInt(process.env.CACHE_REFRESH)
+        : 3600,
+    checkperiod: 120,
+})
+
 const agent = new https.Agent({ rejectUnauthorized: false })
 
-const client = createClient(remoteURL, {
-    username: username,
-    password: password,
+const client = createClient(process.env.REMOTE_URL as string, {
+    username: process.env.REMOTE_USERNAME,
+    password: process.env.REMOTE_PASSWORD,
     httpsAgent: agent,
     withCredentials: true,
 })
@@ -187,7 +211,7 @@ export async function getVideoThumbnail(filename: string) {
 export async function search(query: string) {
     const dirContents = await getContentsCache()
 
-    if (fuzzy) {
+    if (process.env.FUZZY === "true") {
         const basenames = dirContents.map((item: any) => item.basename)
         return fuzz
             .extract(query, basenames, { scorer: fuzz.token_set_ratio })

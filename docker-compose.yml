@@ -4,15 +4,17 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-            args:
-                root_dir: ${ROOT_DIR}
-                remoteURL: ${REMOTEURL}
-                username: ${USERNAME}
-                password: ${PASSWORD}
-                title: ${TITLE}
-                description: ${DESCRIPTION}
-                fuzzy: ${FUZZY:-true}
-                cacheRefresh: ${CACHEREFRESH:-3600}
+        environment:
+            - REMOTE_URL=${REMOTE_URL}
+            - REMOTE_USERNAME=${REMOTE_USERNAME}
+            - REMOTE_PASSWORD=${REMOTE_PASSWORD}
+            - REMOTE_ROOT_DIR=${REMOTE_ROOT_DIR}
+
+            - FUZZY_SEARCH=${FUZZY_SEARCH}
+            - CACHE_REFRESH=${CACHE_REFRESH}
+
+            - NEXT_PUBLIC_TITLE=${NEXT_PUBLIC_TITLE}
+            - NEXT_PUBLIC_DESCRIPTION=${NEXT_PUBLIC_DESCRIPTION}
         ports:
-            - ${PORT:-3000}:3000
+            - ${DOCKER_PORT}:3000
         restart: unless-stopped

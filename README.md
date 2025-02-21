@@ -4,7 +4,7 @@ Interface Indexer for WebDav
 
 ## Config
 
-Create a copy of `config-example.tsx` and remove `-example` with filled fields.
+Create a copy of `.env-example` and remove `-example` with filled fields.
 
 Tested using Nextcloud as WebDav provider [link](https://docs.nextcloud.com/server/latest/user_manual/en/files/access_webdav.html#accessing-public-shares-over-webdav)
 
@@ -45,20 +45,6 @@ npx next start -p 3000 -H 0.0.0.0
 ```
 
 ## Docker
-
-Create `.env` with these fields:
-
-```bash
-root_dir = "/path/to/directory"
-remoteURL = "https://somecoolurl.com"
-username = "whoami"
-password = ""
-title = "Some Cool Title"
-description = "Indexer for Some Cool Title"
-fuzzy = true
-cacheRefresh = 3600
-port = 3000
-```
 
 Build
 
