@@ -186,7 +186,7 @@ export async function getVideoThumbnail(filename: string) {
 export async function search(query: string) {
     const dirContents = await getContentsCache()
 
-    if (process.env.FUZZY_SEARCH === "true") {
+    if (process.env.FUZZY_SEARCH === "false") {
         const basenames = dirContents.map((item: any) => item.basename)
         return fuzz
             .extract(query, basenames, { scorer: fuzz.token_set_ratio })
