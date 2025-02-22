@@ -187,14 +187,9 @@ export async function search(query: string) {
     const dirContents = await getContentsCache()
 
     if (process.env.FUZZY_SEARCH === "false") {
-        const basenames = dirContents.map((item: any) => item.basename)
-        return fuzz
-            .extract(query, basenames, { scorer: fuzz.token_set_ratio })
-            .filter((item: any) => item[1] >= 80)
-            .map((item: any) => {
-                return dirContents.find(
-                    (element: any) => element.basename === item[0]
-                )
+        return dirContents
+            .filter((item: any) => {
+                return item.basename.toLowerCase().includes(query.toLowerCase())
             })
             .map((item: any) => {
                 return {
@@ -203,9 +198,14 @@ export async function search(query: string) {
                 }
             })
     } else {
-        return dirContents
-            .filter((item: any) => {
-                return item.basename.toLowerCase().includes(query.toLowerCase())
+        const basenames = dirContents.map((item: any) => item.basename)
+        return fuzz
+            .extract(query, basenames, { scorer: fuzz.token_set_ratio })
+            .filter((item: any) => item[1] >= 80)
+            .map((item: any) => {
+                return dirContents.find(
+                    (element: any) => element.basename === item[0]
+                )
             })
             .map((item: any) => {
                 return {
