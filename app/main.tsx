@@ -1,12 +1,9 @@
 import "@/styles/globals.css"
-
 import { Inter } from "next/font/google"
 import Head from "next/head"
 import dynamic from "next/dynamic"
-
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-
 import RootLayout from "@/app/layout"
 
 const title = process.env.NEXT_PUBLIC_TITLE || "Some Cool Title"
