@@ -4,6 +4,9 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+            args:
+                - NEXT_PUBLIC_TITLE=${NEXT_PUBLIC_TITLE}
+                - NEXT_PUBLIC_DESCRIPTION=${NEXT_PUBLIC_DESCRIPTION}
         environment:
             - REMOTE_URL=${REMOTE_URL}
             - REMOTE_USERNAME=${REMOTE_USERNAME}
