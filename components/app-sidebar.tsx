@@ -32,7 +32,7 @@ export function AppSidebar({
                             className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-50"
                         >
                             <FolderIcon className="h-6 w-6" />
-                            <span>{title}</span>
+                            <span className="text-base mt-1">{title}</span>
                         </div>
                     </SidebarGroupLabel>
                     <SidebarGroupContent className="mt-2">
