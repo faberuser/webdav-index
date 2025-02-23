@@ -1,4 +1,4 @@
-import "@/styles/globals.css"
+import "@/app/globals.css"
 import { Inter } from "next/font/google"
 import Head from "next/head"
 import dynamic from "next/dynamic"
